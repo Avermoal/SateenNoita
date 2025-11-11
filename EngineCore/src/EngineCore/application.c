@@ -1,6 +1,8 @@
 #include "EngineCore/application.h"
 
 #include "EngineCore/window.h"
+#include "EngineCore/events.h"
+#include "EngineCore/events_data.h"
 
 enum APP_EXIT_CODE appstart(void)
 {
@@ -10,8 +12,14 @@ enum APP_EXIT_CODE appstart(void)
   if(!win.pwin){
     return APP_EXIT_CRITICAL;
   }
+  /*Events system init*/
+  init_events_system(win.pwin);
+  /*Main game loop*/
   while(win.windata.window_should_not_close){
     onupdate(&win);
   }
+  /*Free memory*/
+  termwindow(&win);
+  term_events_system();
   return APP_EXIT_SUCCESS;
 }

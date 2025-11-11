@@ -7,7 +7,7 @@ struct windowdata{
   int width;
   int height;
   const char *title;
-  int window_should_not_close;
+  bool window_should_not_close;
 };
 
 struct window{
