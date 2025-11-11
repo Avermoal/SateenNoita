@@ -1,10 +1,13 @@
 #include "EngineCore/window.h"
 
+#include <stddef.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "EngineCore/debug_log.h"
 #include "EngineCore/events.h"
+#include "EngineCore/shader_program.h"
 
 void initwindow(struct window *pwindow, const char *title, int width, int height)
 {
@@ -39,6 +42,12 @@ void initwindow(struct window *pwindow, const char *title, int width, int height
   pwindow->windata.window_should_not_close = true;
   /*Set OpenGL window user pointer*/
   glfwSetWindowUserPointer(pwindow->pwin, &pwindow->windata);
+  /*Shader program load*/
+  if(load_shader_programs(&pwindow->shp) != SHADER_PROGRAM_EXIT_SUCCESS){
+    LOG_CRITICAL("Shader program don't create\n");
+    termwindow(pwindow);
+    return;
+  }
 }
 
 void termwindow(struct window *pwindow)

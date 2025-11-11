@@ -19,7 +19,8 @@ enum APP_EXIT_CODE appstart(void)
     onupdate(&win);
   }
   /*Free memory*/
-  termwindow(&win);
   term_events_system();
+  destroy_shader_programs(win.shp);
+  termwindow(&win);
   return APP_EXIT_SUCCESS;
 }

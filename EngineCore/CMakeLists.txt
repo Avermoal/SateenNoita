@@ -35,6 +35,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ENGINE_ALL_SOURCES})
 
 target_include_directories(${ENGINE_CORE_NAME} PUBLIC includes)
 target_include_directories(${ENGINE_CORE_NAME} PRIVATE src)
+target_include_directories(${ENGINE_CORE_NAME} PRIVATE ../res)
 
 add_subdirectory(../external/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)
 target_link_libraries(${ENGINE_CORE_NAME} PRIVATE glfw)

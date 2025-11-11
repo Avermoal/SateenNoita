@@ -1,6 +1,8 @@
 #ifndef ENGINECORE_WINDOW_H
 #define ENGINECORE_WINDOW_H
 
+#include "EngineCore/shader_program.h"
+
 struct GLFWwindow;
 
 struct windowdata{
@@ -13,6 +15,7 @@ struct windowdata{
 struct window{
   struct GLFWwindow *pwin;
   struct windowdata windata;
+  struct shaderprogram shp;
 };
 
 void initwindow(struct window *pwindow, const char *title, int width, int height);
