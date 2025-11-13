@@ -52,6 +52,7 @@ void initwindow(struct window *pwindow, const char *title, int width, int height
 
 void termwindow(struct window *pwindow)
 {
+  destroy_shader_programs(pwindow->shp);
   glfwDestroyWindow(pwindow->pwin);
 	glfwTerminate();
 }
