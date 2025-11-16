@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 4.0.1)
 
 set(ENGINE_CORE_NAME EngineCore)
 
+set(MATH_PRIVATE_INCLUDES
+  includes/Mathematics/vector.h
+)
+
+set(MATH_PRIVATE_SOURCES
+  src/Mathematics/vector.c
+)
+
 set(ENGINE_PUBLIC_INCLUDES
   includes/EngineCore/application.h
   includes/EngineCore/debug_log.h
@@ -13,6 +21,11 @@ set(ENGINE_PRIVATE_INCLUDES
   includes/EngineCore/events.h
   includes/EngineCore/events_data.h
   includes/EngineCore/camera.h
+  includes/EngineCore/game_interface.h
+  includes/EngineCore/display_manager.h
+  includes/EngineCore/texture_manager.h
+
+  ${MATH_PRIVATE_INCLUDES}
 )
 
 set(ENGINE_PRIVATE_SOURCES
@@ -21,6 +34,11 @@ set(ENGINE_PRIVATE_SOURCES
   src/EngineCore/events.c
   src/EngineCore/shader_program.c
   src/EngineCore/window.c
+  src/EngineCore/game_interface.c
+  src/EngineCore/display_manager.c
+  src/EngineCore/texture_manager.c
+
+  ${MATH_PRIVATE_SOURCES}
 )
 
 set(ENGINE_ALL_SOURCES

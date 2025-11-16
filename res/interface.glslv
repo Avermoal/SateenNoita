@@ -4,7 +4,8 @@ layout(location = 1) in vec3 vertexcol;
 
 out vec3 color;
 
-void main() {
+void main(void)
+{
 	color = vertexcol;
-	gl_Position = vec4(vertexpos)
+	gl_Position = vec4(vertexpos, 0.0f);
 }

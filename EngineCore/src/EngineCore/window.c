@@ -8,6 +8,9 @@
 #include "EngineCore/debug_log.h"
 #include "EngineCore/events.h"
 #include "EngineCore/shader_program.h"
+#include "EngineCore/display_manager.h"
+
+struct element triangle;
 
 void initwindow(struct window *pwindow, const char *title, int width, int height)
 {
@@ -16,6 +19,9 @@ void initwindow(struct window *pwindow, const char *title, int width, int height
     LOG_CRITICAL("Failed init GLFW.\n");
     return;
   }
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   /*Window creation*/
   if(pwindow){
     pwindow->pwin = glfwCreateWindow(width, height, title, NULL, NULL);
@@ -48,6 +54,15 @@ void initwindow(struct window *pwindow, const char *title, int width, int height
     termwindow(pwindow);
     return;
   }
+
+
+  /*EXPERIMENTS!*/
+  struct vertex vert[] = {
+      {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f}},
+      {{0.5f, -0.5f, 0.0f}, {1.0f, 0.0f}},
+      {{0.0f, 0.5f, 0.0f}, {0.5f, 1.0f}}
+    };
+  triangle = createelement(vert, 3, NULL, 0, GL_STATIC_DRAW);
 }
 
 void termwindow(struct window *pwindow)
@@ -55,14 +70,22 @@ void termwindow(struct window *pwindow)
   destroy_shader_programs(pwindow->shp);
   glfwDestroyWindow(pwindow->pwin);
 	glfwTerminate();
+
+
+  /*EXPERIMENTS!*/
+  destroyelement(&triangle);
 }
 
 void onupdate(struct window *pwindow)
 {
   /*Clear window buffer*/
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   /*GL swap buffeers*/
   glfwSwapBuffers(pwindow->pwin);
+  /*Game draws*/
+  bind_shader_program(pwindow->shp.interfaceprog);
+  displayelement(triangle);
+  unbind_shader_program();
   /*Game actions*/
   if(jclicked(GLFW_MOUSE_BUTTON_1)){
     glClearColor(0.4f, 1.0f, 0.3f, 1.0f);

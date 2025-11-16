@@ -53,12 +53,14 @@ unsigned int create_shader_program(const char *vertsh_code, const char *fragsh_c
   if(!success){
     glGetShaderInfoLog(vertsh_ID, 512, NULL, infolog);
     LOG_CRITICAL("Vertex shader not compiled\n");
+    LOG_CRITICAL(infolog);
     return 0;
   }
   glGetShaderiv(fragsh_ID, GL_COMPILE_STATUS, &success);
   if(!success){
     glGetShaderInfoLog(fragsh_ID, 512, NULL, infolog);
-    LOG_CRITICAL("Vertex shader not compiled\n");
+    LOG_CRITICAL("Fragment shader not compiled\n");
+    LOG_CRITICAL(infolog);
     return 0;
   }
   /*Create shader program*/
@@ -78,6 +80,7 @@ unsigned int create_shader_program(const char *vertsh_code, const char *fragsh_c
   if(!success){
     glGetProgramInfoLog(shp, 512, NULL, infolog);
     LOG_CRITICAL("Shader program not created\n");
+    LOG_CRITICAL(infolog);
     return 0;
   }
   return shp;
