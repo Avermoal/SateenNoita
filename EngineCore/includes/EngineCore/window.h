@@ -4,6 +4,7 @@
 #include "EngineCore/shader_program.h"
 
 struct GLFWwindow;
+struct scene;
 
 struct windowdata{
   int width;
@@ -16,6 +17,7 @@ struct window{
   struct GLFWwindow *pwin;
   struct windowdata windata;
   struct shaderprogram shp;
+  struct scene *scn;
 };
 
 void initwindow(struct window *pwindow, const char *title, int width, int height);
