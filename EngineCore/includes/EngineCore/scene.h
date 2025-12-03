@@ -1,21 +1,21 @@
 #ifndef ENGINECORE_SCENE_H
 #define ENGINECORE_SCENE_H
 
-#include "EngineCore/display_manager.h"
+#include "EngineCore/tiles_map.h"
 
-#define CELLS_NUMBER 117/*9x13 cells space*/
+struct GLFWwindow_;
+struct window;
 
 struct scene{
-  const float fov;
-  struct element gamefield[CELLS_NUMBER];/*9x13 cells space*/
+  struct tilemap map;
 };
 
-void initscene(struct scene *scn);
+void initscene(struct scene *scn, struct GLFWwindow_ *win);
 
 void destroyscene(struct scene *scn);
 
-void renderscene(struct scene *scn);
+void renderscene(struct scene *scn, struct window *win);
 
-
+void updatescene(struct scene *scn);
 
 #endif/*ENGINECORE_SCENE_H*/

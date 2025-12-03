@@ -12,6 +12,7 @@
 #include"EngineCore/display_manager.h"
 #include"EngineCore/texture_manager.h"
 
+/*EXPERIMENTS!*/
 struct element triangle;
 struct texture tex;
 
@@ -89,6 +90,7 @@ void onupdate(struct window *pwindow)
   bind_shader_program(pwindow->shp.interfaceprog);
   bindtexture(tex);
   displayelement(triangle);
+  unbindtexture();
   unbind_shader_program();
   /*GL swap buffeers*/
   glfwSwapBuffers(pwindow->pwin);

@@ -5,9 +5,12 @@
 
 #include <glad/glad.h>
 
+#define COORDINATES 3
+#define TEXTURE_COORDINATES 2
+
 struct vertex{
-  float pos[3];
-  float tex[2];/*Texture coordinates*/
+  float pos[COORDINATES];
+  float tex[TEXTURE_COORDINATES];/*Texture coordinates*/
 };
 
 struct element{

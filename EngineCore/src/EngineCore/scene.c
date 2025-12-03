@@ -1,7 +1,25 @@
 #include "EngineCore/scene.h"
 
-void initscene(struct scene *scn)
+#include <glad/glad.h>
+
+#include "EngineCore/window.h"
+
+void initscene(struct scene *scn, strcut GLFWwindow *win)
 {
-  scn->fov = 70;
+  createtilemap(&scn->map, win);
+}
+
+void destroyscene(struct scene *scn)
+{
+
+}
+
+void renderscene(struct scene *scn, struct window *win)
+{
+  
+}
+
+void updatescene(struct scene *scn)
+{
   
 }

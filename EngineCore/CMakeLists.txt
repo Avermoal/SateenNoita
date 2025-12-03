@@ -4,10 +4,12 @@ set(ENGINE_CORE_NAME EngineCore)
 
 set(MATH_PRIVATE_INCLUDES
   includes/Mathematics/vector.h
+  includes/Mathematics/ortho_projection.h
 )
 
 set(MATH_PRIVATE_SOURCES
   src/Mathematics/vector.c
+  src/Mathematics/ortho_projection.c
 )
 
 set(ENGINE_PUBLIC_INCLUDES
@@ -24,6 +26,7 @@ set(ENGINE_PRIVATE_INCLUDES
   includes/EngineCore/game_interface.h
   includes/EngineCore/display_manager.h
   includes/EngineCore/texture_manager.h
+  includes/EngineCore/tiles_map.h
 
   ${MATH_PRIVATE_INCLUDES}
 )
@@ -37,6 +40,7 @@ set(ENGINE_PRIVATE_SOURCES
   src/EngineCore/game_interface.c
   src/EngineCore/display_manager.c
   src/EngineCore/texture_manager.c
+  src/EngineCore/tiles_map.c
 
   ${MATH_PRIVATE_SOURCES}
 )
