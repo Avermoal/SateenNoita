@@ -11,6 +11,7 @@
 struct vertex{
   float pos[COORDINATES];
   float tex[TEXTURE_COORDINATES];/*Texture coordinates*/
+  float texlayer;
 };
 
 struct element{
@@ -24,7 +25,7 @@ struct element{
 /*Draw 2D element on the screen*/
 void displayelement(struct element elem);
 
-struct element createelement(struct vertex *vert, size_t vertexcount, unsigned int *indices, size_t indexcount, GLenum usage);
+struct element createelement(struct vertex *vert, size_t vertexcount, unsigned int *indices, size_t indexcount, bool use_texture_layers, GLenum usage);
 
 void destroyelement(struct element *elem);
 

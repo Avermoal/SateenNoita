@@ -25,6 +25,7 @@ set(ENGINE_PRIVATE_INCLUDES
   includes/EngineCore/scene.h
   includes/EngineCore/game_interface.h
   includes/EngineCore/display_manager.h
+  includes/EngineCore/tiles_info.h
   includes/EngineCore/texture_manager.h
   includes/EngineCore/tiles_map.h
 
@@ -57,7 +58,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ENGINE_ALL_SOURCES})
 
 target_include_directories(${ENGINE_CORE_NAME} PUBLIC includes)
 target_include_directories(${ENGINE_CORE_NAME} PRIVATE src)
-target_include_directories(${ENGINE_CORE_NAME} PRIVATE ../res)
 target_include_directories(${ENGINE_CORE_NAME} PRIVATE ../external/stbi)
 
 add_subdirectory(../external/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)

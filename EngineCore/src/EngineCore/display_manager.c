@@ -13,7 +13,7 @@ void displayelement(struct element elem)
   glBindVertexArray(0);
 }
 
-struct element createelement(struct vertex *vert, size_t vertexcount, unsigned int *indices, size_t indexcount, GLenum usage)
+struct element createelement(struct vertex *vert, size_t vertexcount, unsigned int *indices, size_t indexcount, bool use_texture_layers, GLenum usage)
 {
   struct element elem = {0, 0, 0, NULL, NULL, 0, 0};
   elem.vertexcount = vertexcount;
@@ -47,9 +47,14 @@ struct element createelement(struct vertex *vert, size_t vertexcount, unsigned i
   /*Position atribute*/
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct vertex), (void*)offsetof(struct vertex, pos));
-  /*TExture atribute*/
+  /*Texture atribute*/
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), (void*)offsetof(struct vertex, tex));
+  /*Texture layer atribute*/
+  if(use_texture_layers){
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(struct vertex), (void*)offsetof(struct vertex, texlayer));
+  }
   /*OpenGL unbind vertex array*/
   glBindVertexArray(0);
   return elem;

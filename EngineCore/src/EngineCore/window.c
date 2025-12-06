@@ -1,7 +1,7 @@
 #include "EngineCore/window.h"
 
 #include <stddef.h>
-#include<stdlib.h>
+#include <stdlib.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -9,12 +9,7 @@
 #include "EngineCore/debug_log.h"
 #include "EngineCore/events.h"
 #include "EngineCore/shader_program.h"
-#include"EngineCore/display_manager.h"
-#include"EngineCore/texture_manager.h"
-
-/*EXPERIMENTS!*/
-struct element triangle;
-struct texture tex;
+#include "EngineCore/scene.h"
 
 void initwindow(struct window *pwindow, const char *title, int width, int height)
 {
@@ -59,24 +54,20 @@ void initwindow(struct window *pwindow, const char *title, int width, int height
     return;
   }
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-
-  /*EXPERIMENTS!*/
-  struct vertex vert[] = {
-      {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f}},
-      {{0.5f, -0.5f, 0.0f}, {1.0f, 0.0f}},
-      {{0.0f, 0.5f, 0.0f}, {0.5f, 1.0f}}
-    };
-  triangle = createelement(vert, 3, NULL, 0, GL_STATIC_DRAW);
-  loadtexture(&tex, "../res/img.png");
+  /*Init scene*/
+  pwindow->scn = malloc(sizeof(struct scene));
+  if(!pwindow->scn){
+    LOG_CRITICAL("Scene not init\n");
+    return;
+  }
+  initscene(pwindow->scn, pwindow);
 }
 
 void termwindow(struct window *pwindow)
 {
-  /*EXPERIMENTS!*/
-  destroyelement(&triangle);
-  deletetexture(&tex);
-
+  if(pwindow->scn){
+    destroyscene(pwindow->scn);
+  }
   destroy_shader_programs(pwindow->shp);
   glfwDestroyWindow(pwindow->pwin);
 	glfwTerminate();
@@ -87,11 +78,7 @@ void onupdate(struct window *pwindow)
   /*Clear window buffer*/
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   /*Game draws*/
-  bind_shader_program(pwindow->shp.interfaceprog);
-  bindtexture(tex);
-  displayelement(triangle);
-  unbindtexture();
-  unbind_shader_program();
+  renderscene(pwindow);
   /*GL swap buffeers*/
   glfwSwapBuffers(pwindow->pwin);
   /*Game actions*/

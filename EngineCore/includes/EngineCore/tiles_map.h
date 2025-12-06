@@ -1,20 +1,15 @@
 #ifndef ENGINECORE_TIELS_MAP_H
 #define ENGINECORE_TIELS_MAP_H
 
-#include <glad/glad.h>
-
 #include "EngineCore/display_manager.h"
+#include "EngineCore/texture_manager.h"
+#include "EngineCore/tiles_info.h"
 
 #define MAP_WIDTH 9
 #define MAP_HEIGHT 13
 #define CELLS_NUMBER (MAP_WIDTH * MAP_HEIGHT) /*117*/
-#define TILE_SIZE 16
 
-enum TILE_TYPE{
-  GROUND = 0,
-  GRASS = 1,
-  WALL,
-};
+struct GLFWwindow;
 
 struct tile{
   float xcoord;/*OpenGL use float for displaying elements on screen*/
@@ -24,6 +19,7 @@ struct tile{
 };
 
 struct tilemap{
+  struct texturearray texarr;
   int xcoord;/*Use pixels coordinate on the window*/
   int ycoord;
   int width;
@@ -31,7 +27,7 @@ struct tilemap{
   struct tile gamemap[CELLS_NUMBER];
 };
 
-void createtilemap(struct tilemap *map, GLFWwindow *win);
+void createtilemap(struct tilemap *map, struct GLFWwindow *win);
 
 void destroytilemap(struct tilemap *map);/*Need to destroy elements in tiles*/
 

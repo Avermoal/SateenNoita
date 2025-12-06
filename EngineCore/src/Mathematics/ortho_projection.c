@@ -1,4 +1,4 @@
-#include "Mathemathics/orthoprojection.h"
+#include "Mathematics/ortho_projection.h"
 
 void create_ortho_projection(float projection[16], float left, float right, float bottom, float top)
 {
@@ -17,7 +17,7 @@ void create_ortho_projection(float projection[16], float left, float right, floa
   projection[10] = -1.0f;
   projection[11] = 0.0f;
   
-  projection[12] = -(rigth+left)/(right-left);
+  projection[12] = -(right+left)/(right-left);
   projection[13] = -(top+bottom)/(top-bottom);
   projection[14] = 0.0f;
   projection[15] = 1.0f;
