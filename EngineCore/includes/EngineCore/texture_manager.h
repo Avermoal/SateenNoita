@@ -3,6 +3,8 @@
 
 #include <glad/glad.h>
 
+typedef unsigned int texnumber;
+
 struct texture{
   GLuint id;
   GLint width, height;
@@ -29,5 +31,9 @@ void bind_texture_array(struct texturearray texarr);
 void unbind_texture_array(void);
 
 void delete_texture_array(struct texturearray* texarr);
+
+/*Returns number of textures in dir res/textures*/
+texnumber get_textures_number(const char* path_to_dir);
+void get_textures_names(texnumber texnum, char* texture_files[texnum], const char* path_to_dir);
 
 #endif/*ENGINECORE_TEXTURE_MANAGER_H*/

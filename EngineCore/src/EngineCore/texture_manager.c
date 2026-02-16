@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <dirent.h>
 
 #include "EngineCore/debug_log.h"
 #include "EngineCore/tiles_info.h"
@@ -65,14 +66,14 @@ void unbindtexture(void)
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void deletetexture(struct texture *tex)
+void deletetexture(struct texture* tex)
 {
   glDeleteTextures(1, &tex->id);
   tex->width = 0;
   tex->height = 0;
 }
 
-void load_texture_array(struct texturearray *texarr, GLint size_in_pixels, GLuint layers, const char *path_to_dir)
+void load_texture_array(struct texturearray* texarr, GLint size_in_pixels, GLuint layers, const char* path_to_dir)
 {
   GLuint texarr_id = 0;
   /*Flip stbi loading image configure*/
@@ -83,14 +84,10 @@ void load_texture_array(struct texturearray *texarr, GLint size_in_pixels, GLuin
   /*Memory allocation*/
   glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, size_in_pixels, size_in_pixels, layers);
   /*Load textures in order*/
-  const char* texture_files[] = {
-    "ground.png",
-    "grass.png",
-    "wall.png",
-    "test.png"
-  };
+  char* texture_files[layers];
+  get_textures_names(layers, texture_files, path_to_dir);
   for(GLuint i = 0; i < layers; ++i){
-    /*Full path to images*/
+    /*Full path to current image*/
     char full_path[256];
     snprintf(full_path, sizeof(full_path), "%s/%s", path_to_dir, texture_files[i]);
     int width, height, channels;
@@ -135,4 +132,36 @@ void delete_texture_array(struct texturearray* texarr)
   glDeleteTextures(1, &texarr->id);
   texarr->size_in_pixels = 0;
   texarr->layers = 0;
+}
+
+texnumber get_textures_number(const char* path_to_dir)
+{
+  texnumber texnum = 0;
+  DIR* dirp = opendir(path_to_dir);
+  if(dirp){
+    struct dirent* entry;
+    while((entry = readdir(dirp)) != NULL) {
+      if(entry->d_type == DT_REG) { /*If the entry is a regular file*/
+           ++texnum;
+      }
+    }
+    closedir(dirp);
+  }
+  return texnum;
+}
+
+void get_textures_names(texnumber texnum, char* tex_files[texnum], const char* path_to_dir)
+{
+  DIR* dirp = opendir(path_to_dir);
+  if(dirp){
+    struct dirent* entry;
+    texnumber tn = 0;
+    while((entry = readdir(dirp)) != NULL){
+      if(entry->d_type == DT_REG){
+        tex_files[tn] = strdup(entry->d_name);
+        ++tn;
+      }
+    }
+    closedir(dirp);
+  }
 }

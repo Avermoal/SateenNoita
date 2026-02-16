@@ -27,10 +27,18 @@ void createtilemap(struct tilemap* map, struct GLFWwindow* win)
   map->width = (int)(MAP_WIDTH_ASPECT * windowwidth);
   map->height = MAP_HEIGHT_ASPECT * windowheight;
   /*Load texture array*/
-  load_texture_array(&map->texarr, TILE_SIZE, TILES_TYPE_NUMBER, PATH_TO_TEXTURES);
-  if(!map->texarr.id){
-    LOG_CRITICAL("Failed to load texture array\n");
+  #ifndef NDEBUG
+  if(TILES_TYPE_NUMBER == get_textures_number(PATH_TO_TEXTURES)){
+    load_texture_array(&map->texarr, TILE_SIZE, TILES_TYPE_NUMBER, PATH_TO_TEXTURES);
+    if(!map->texarr.id){
+      LOG_CRITICAL("Failed to load texture array\n");
+    }
+  }else{
+    LOG_CRITICAL("TILES_TYPE_NUMBER != get_textures_number()\n");
   }
+  #else
+  load_texture_array(&map->texarr, TILE_SIZE, TILES_TYPE_NUMBER, PATH_TO_TEXTURES);
+  #endif
   /*Create vertices and indices for all tiles*/
   struct vertex vertices[VERTICES_COUNT];
   unsigned int indices[INDICES_COUNT] = {0, 1, 2, 2, 3, 0};
