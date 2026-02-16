@@ -20,7 +20,7 @@ void destroyscene(struct scene** scn)
   }
 }
 
-void renderscene(struct window *win)
+void renderscene(struct window* win)
 {
   /*Render tilemap*/
   bind_shader_program(win->shp.gameprog);
@@ -59,7 +59,7 @@ void renderscene(struct window *win)
   unbind_shader_program();
 }
 
-void updatescene(struct scene *scn)
+void updatescene(struct scene* scn)
 {
   
 }

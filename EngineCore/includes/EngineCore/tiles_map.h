@@ -27,12 +27,12 @@ struct tilemap{
   struct tile gamemap[CELLS_NUMBER];
 };
 
-void createtilemap(struct tilemap *map, struct GLFWwindow *win);
+void createtilemap(struct tilemap* map, struct GLFWwindow* win);
 
-void destroytilemap(struct tilemap *map);/*Need to destroy elements in tiles*/
+void destroytilemap(struct tilemap* map);/*Need to destroy elements in tiles*/
 
-void updatetilemap(struct tilemap *map);
+void updatetilemap(struct tilemap* map);
 
-void rendertilemap(struct tilemap *map, GLuint shaderprogram, float screenaspect);
+void rendertilemap(struct tilemap* map, GLuint shaderprogram, float screenaspect);
 
 #endif/*ENGINECORE_TIELS_MAP_H*/

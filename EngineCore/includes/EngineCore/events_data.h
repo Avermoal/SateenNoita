@@ -2,8 +2,8 @@
 #define ENGINECORE_EVENTS_DATA_H
 
 struct eventsdata{
-  bool *keys;
-	unsigned short *frames;
+  bool* keys;
+	unsigned short* frames;
 	unsigned short current;
 	float x;
 	float y;

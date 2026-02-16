@@ -25,8 +25,8 @@ struct element{
 /*Draw 2D element on the screen*/
 void displayelement(struct element elem);
 
-struct element createelement(struct vertex *vert, size_t vertexcount, unsigned int *indices, size_t indexcount, bool use_texture_layers, GLenum usage);
+struct element createelement(struct vertex* vert, size_t vertexcount, unsigned int* indices, size_t indexcount, bool use_texture_layers, GLenum usage);
 
-void destroyelement(struct element *elem);
+void destroyelement(struct element* elem);
 
 #endif/*ENGINECORE_DISPLAY_MANAGER_H*/

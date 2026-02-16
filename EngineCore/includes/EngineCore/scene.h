@@ -9,12 +9,12 @@ struct scene{
   struct tilemap map;
 };
 
-void initscene(struct scene *scn, struct window *win);
+void initscene(struct scene* scn, struct window* win);
 
-void destroyscene(struct scene **scn);
+void destroyscene(struct scene** scn);
 
-void renderscene(struct window *win);
+void renderscene(struct window* win);
 
-void updatescene(struct scene *scn);
+void updatescene(struct scene* scn);
 
 #endif/*ENGINECORE_SCENE_H*/

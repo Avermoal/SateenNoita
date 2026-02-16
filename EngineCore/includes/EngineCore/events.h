@@ -3,7 +3,7 @@
 
 struct GLFWwindow;
 
-void init_events_system(struct GLFWwindow *pwindow);
+void init_events_system(struct GLFWwindow* pwindow);
 
 void term_events_system(void);
 

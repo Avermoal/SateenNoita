@@ -14,12 +14,12 @@ enum SHADER_PROGRAM_EXIT_CODE load_shader_programs(struct shaderprogram* shp)
   shp->gameprog = 0;
   shp->menuprog = 0;
   /*Interface shader program*/
-  const char *interface_vertsh_source = "res/interface.glslv";
-  const char *interface_fragsh_source = "res/interface.glslf";
+  const char* interface_vertsh_source = "res/interface.glslv";
+  const char* interface_fragsh_source = "res/interface.glslf";
   size_t interface_vertsh_length = shlength(interface_vertsh_source);
   size_t interface_fragsh_length = shlength(interface_fragsh_source);
-  char *interface_vertsh_code = (char*)calloc(interface_vertsh_length + 1, sizeof(char));
-  char *interface_fragsh_code = (char*)calloc(interface_fragsh_length + 1, sizeof(char));
+  char* interface_vertsh_code = (char*)calloc(interface_vertsh_length + 1, sizeof(char));
+  char* interface_fragsh_code = (char*)calloc(interface_fragsh_length + 1, sizeof(char));
   if(!readshader(interface_vertsh_source, interface_vertsh_code, interface_vertsh_length)){
     LOG_CRITICAL("[SHADER]: Interface vertex shader don't load\n");
     return SHADER_PROGRAM_EXIT_FAILURE;
@@ -32,12 +32,12 @@ enum SHADER_PROGRAM_EXIT_CODE load_shader_programs(struct shaderprogram* shp)
   free(interface_vertsh_code);
   free(interface_fragsh_code);
   /*Game shader program*/
-  const char *game_vertsh_source = "res/game.glslv";
-  const char *game_fragsh_source = "res/game.glslf";
+  const char* game_vertsh_source = "res/game.glslv";
+  const char* game_fragsh_source = "res/game.glslf";
   size_t game_vertsh_length = shlength(game_vertsh_source);
   size_t game_fragsh_length = shlength(game_fragsh_source);
-  char *game_vertsh_code = (char*)calloc(game_vertsh_length + 1, sizeof(char));
-  char *game_fragsh_code = (char*)calloc(game_fragsh_length + 1, sizeof(char));
+  char* game_vertsh_code = (char*)calloc(game_vertsh_length + 1, sizeof(char));
+  char* game_fragsh_code = (char*)calloc(game_fragsh_length + 1, sizeof(char));
   if(!readshader(game_vertsh_source, game_vertsh_code, game_vertsh_length)){
     LOG_CRITICAL("[SHADER]: Game vertex shader don't load\n");
     return SHADER_PROGRAM_EXIT_FAILURE;
@@ -54,7 +54,7 @@ enum SHADER_PROGRAM_EXIT_CODE load_shader_programs(struct shaderprogram* shp)
   return SHADER_PROGRAM_EXIT_SUCCESS;
 }
 
-unsigned int create_shader_program(const char *vertsh_code, const char *fragsh_code)
+unsigned int create_shader_program(const char* vertsh_code, const char* fragsh_code)
 {
   unsigned int shp = 0;
   /*Create shaders ID*/
@@ -129,9 +129,9 @@ void unbind_shader_program()
   glUseProgram(0);
 }
 
-bool readshader(const char *path, char *shader, size_t shaderlength)
+bool readshader(const char* path, char* shader, size_t shaderlength)
 {
-  FILE *shader_src = fopen(path, "r");
+  FILE* shader_src = fopen(path, "r");
   if(!shader_src){
     LOG_CRITICAL("Shader not read\n");
     return false;
@@ -143,7 +143,7 @@ bool readshader(const char *path, char *shader, size_t shaderlength)
 
 size_t shlength(const char *path)
 {
-  FILE *shader = fopen(path, "r");
+  FILE* shader = fopen(path, "r");
   if(!shader){
     LOG_CRITICAL("SHLENGTH LOL\n");
     return 0;

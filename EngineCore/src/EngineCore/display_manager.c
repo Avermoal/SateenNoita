@@ -15,7 +15,7 @@ void displayelement(struct element elem)
   glBindVertexArray(0);
 }
 
-struct element createelement(struct vertex *vert, size_t vertexcount, unsigned int *indices, size_t indexcount, bool use_texture_layers, GLenum usage)
+struct element createelement(struct vertex* vert, size_t vertexcount, unsigned int* indices, size_t indexcount, bool use_texture_layers, GLenum usage)
 {
   struct element elem = {0, 0, 0, NULL, NULL, 0, 0};
   elem.vertexcount = vertexcount;
@@ -73,7 +73,7 @@ struct element createelement(struct vertex *vert, size_t vertexcount, unsigned i
   return elem;
 }
 
-void destroyelement(struct element *elem)
+void destroyelement(struct element* elem)
 {
   if(elem->vert){
     free(elem->vert);

@@ -11,7 +11,7 @@
 #define STBI_ONLY_PNG
 #include <stb_image.h>
 
-GLuint loadpng(const char *filename, GLint *width, GLint *height)
+GLuint loadpng(const char* filename, GLint* width, GLint* height)
 {
   int channels = 0;
 	GLuint texid = 0;
@@ -46,7 +46,7 @@ GLuint loadpng(const char *filename, GLint *width, GLint *height)
 	return texid;
 }
 
-void loadtexture(struct texture *tex, const char *filename)
+void loadtexture(struct texture* tex, const char* filename)
 {
   tex->id = loadpng(filename, &tex->width, &tex->height);
   if(!tex){
@@ -83,7 +83,7 @@ void load_texture_array(struct texturearray *texarr, GLint size_in_pixels, GLuin
   /*Memory allocation*/
   glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, size_in_pixels, size_in_pixels, layers);
   /*Load textures in order*/
-  const char *texture_files[] = {
+  const char* texture_files[] = {
     "ground.png",
     "grass.png",
     "wall.png",
@@ -94,7 +94,7 @@ void load_texture_array(struct texturearray *texarr, GLint size_in_pixels, GLuin
     char full_path[256];
     snprintf(full_path, sizeof(full_path), "%s/%s", path_to_dir, texture_files[i]);
     int width, height, channels;
-    unsigned char *img = stbi_load(full_path, &width, &height, &channels, STBI_rgb_alpha);
+    unsigned char* img = stbi_load(full_path, &width, &height, &channels, STBI_rgb_alpha);
     if(!img){
       LOG_CRITICAL("Failed to load texture: %s\n", full_path);
       continue;
@@ -130,7 +130,7 @@ void unbind_texture_array(void)
   glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-void delete_texture_array(struct texturearray *texarr)
+void delete_texture_array(struct texturearray* texarr)
 {
   glDeleteTextures(1, &texarr->id);
   texarr->size_in_pixels = 0;
