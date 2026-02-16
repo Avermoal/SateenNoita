@@ -81,19 +81,20 @@ void load_texture_array(struct texturearray *texarr, GLint size_in_pixels, GLuin
   glGenTextures(1, &texarr_id);
   glBindTexture(GL_TEXTURE_2D_ARRAY, texarr_id);
   /*Memory allocation*/
-  glTexStorage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, size_in_pixels, size_in_pixels, layers);
+  glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, size_in_pixels, size_in_pixels, layers);
   /*Load textures in order*/
   const char *texture_files[] = {
     "ground.png",
-    "grass.png", 
-    "wall.png"
+    "grass.png",
+    "wall.png",
+    "test.png"
   };
   for(GLuint i = 0; i < layers; ++i){
     /*Full path to images*/
     char full_path[256];
     snprintf(full_path, sizeof(full_path), "%s/%s", path_to_dir, texture_files[i]);
     int width, height, channels;
-    unsigned char *img = stbi_load(full_path, &width, &height, &channels, 4);
+    unsigned char *img = stbi_load(full_path, &width, &height, &channels, STBI_rgb_alpha);
     if(!img){
       LOG_CRITICAL("Failed to load texture: %s\n", full_path);
       continue;
@@ -117,6 +118,7 @@ void load_texture_array(struct texturearray *texarr, GLint size_in_pixels, GLuin
   /*Unbind texture array*/
   glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
+
 
 void bind_texture_array(struct texturearray texarr)
 {

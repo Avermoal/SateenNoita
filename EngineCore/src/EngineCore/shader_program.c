@@ -7,15 +7,19 @@
 
 #include "EngineCore/debug_log.h"
 
-enum SHADER_PROGRAM_EXIT_CODE load_shader_programs(struct shaderprogram *shp)
+enum SHADER_PROGRAM_EXIT_CODE load_shader_programs(struct shaderprogram* shp)
 {
+  /*Initialize programs variables*/
+  shp->interfaceprog = 0;
+  shp->gameprog = 0;
+  shp->menuprog = 0;
   /*Interface shader program*/
   const char *interface_vertsh_source = "res/interface.glslv";
   const char *interface_fragsh_source = "res/interface.glslf";
   size_t interface_vertsh_length = shlength(interface_vertsh_source);
   size_t interface_fragsh_length = shlength(interface_fragsh_source);
-  char *interface_vertsh_code = (char*)calloc(interface_vertsh_length, sizeof(char));
-  char *interface_fragsh_code = (char*)calloc(interface_fragsh_length, sizeof(char));
+  char *interface_vertsh_code = (char*)calloc(interface_vertsh_length + 1, sizeof(char));
+  char *interface_fragsh_code = (char*)calloc(interface_fragsh_length + 1, sizeof(char));
   if(!readshader(interface_vertsh_source, interface_vertsh_code, interface_vertsh_length)){
     LOG_CRITICAL("[SHADER]: Interface vertex shader don't load\n");
     return SHADER_PROGRAM_EXIT_FAILURE;
@@ -32,8 +36,8 @@ enum SHADER_PROGRAM_EXIT_CODE load_shader_programs(struct shaderprogram *shp)
   const char *game_fragsh_source = "res/game.glslf";
   size_t game_vertsh_length = shlength(game_vertsh_source);
   size_t game_fragsh_length = shlength(game_fragsh_source);
-  char *game_vertsh_code = (char*)calloc(game_vertsh_length, sizeof(char));
-  char *game_fragsh_code = (char*)calloc(game_fragsh_length, sizeof(char));
+  char *game_vertsh_code = (char*)calloc(game_vertsh_length + 1, sizeof(char));
+  char *game_fragsh_code = (char*)calloc(game_fragsh_length + 1, sizeof(char));
   if(!readshader(game_vertsh_source, game_vertsh_code, game_vertsh_length)){
     LOG_CRITICAL("[SHADER]: Game vertex shader don't load\n");
     return SHADER_PROGRAM_EXIT_FAILURE;
@@ -104,9 +108,15 @@ unsigned int create_shader_program(const char *vertsh_code, const char *fragsh_c
 
 void destroy_shader_programs(struct shaderprogram shp)
 {
-  glDeleteShader(shp.interfaceprog);
-  glDeleteShader(shp.gameprog);
-  glDeleteShader(shp.menuprog);
+  if(shp.interfaceprog){
+    glDeleteProgram(shp.interfaceprog);
+  }
+  if(shp.gameprog){
+    glDeleteProgram(shp.gameprog);
+  }
+  if(shp.menuprog){
+    glDeleteProgram(shp.menuprog);
+  }
 }
 
 void bind_shader_program(unsigned int id)

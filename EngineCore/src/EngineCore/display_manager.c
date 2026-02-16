@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+#include "EngineCore/debug_log.h"
+
 void displayelement(struct element elem)
 {
   glBindVertexArray(elem.vao);
@@ -33,6 +35,11 @@ struct element createelement(struct vertex *vert, size_t vertexcount, unsigned i
   /*Create OpenGL buffers*/
   glGenVertexArrays(1, &elem.vao);
   glGenBuffers(1, &elem.vbo);
+  #ifndef NDEBUG
+    if(elem.vao == 0 || elem.vbo == 0) {
+      LOG_CRITICAL("Failed to generate OpenGL objects!\n");
+    }
+  #endif
   glBindVertexArray(elem.vao);
   /*Vertex buffer*/
   glBindBuffer(GL_ARRAY_BUFFER, elem.vbo);
@@ -53,8 +60,14 @@ struct element createelement(struct vertex *vert, size_t vertexcount, unsigned i
   /*Texture layer atribute*/
   if(use_texture_layers){
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(struct vertex), (void*)offsetof(struct vertex, texlayer));
+    glVertexAttribIPointer(2, 1, GL_INT, sizeof(struct vertex), (void*)offsetof(struct vertex, texlayer));
   }
+  #ifndef NDEBUG/*Check OpenGL errors*/
+    GLenum err = glGetError();
+    if(err != GL_NO_ERROR) {
+      LOG_CRITICAL("OpenGL error in createelement: 0x%x\n", err);
+    }
+  #endif
   /*OpenGL unbind vertex array*/
   glBindVertexArray(0);
   return elem;

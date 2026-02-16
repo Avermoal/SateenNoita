@@ -4,6 +4,8 @@
 #include <GLFW/glfw3.h>
 #include <stdlib.h>
 
+#include "EngineCore/debug_log.h"
+
 #include "Mathematics/ortho_projection.h"
 
 #define MAP_WIDTH_ASPECT 0.5f
@@ -14,7 +16,7 @@
 
 #define PATH_TO_TEXTURES "res/textures"
 
-void createtilemap(struct tilemap *map, struct GLFWwindow *win)
+void createtilemap(struct tilemap* map, struct GLFWwindow* win)
 {
   /*Set map coords*/
   int windowwidth = 0, windowheight = 0;
@@ -26,6 +28,9 @@ void createtilemap(struct tilemap *map, struct GLFWwindow *win)
   map->height = MAP_HEIGHT_ASPECT * windowheight;
   /*Load texture array*/
   load_texture_array(&map->texarr, TILE_SIZE, TILES_TYPE_NUMBER, PATH_TO_TEXTURES);
+  if(!map->texarr.id){
+    LOG_CRITICAL("Failed to load texture array\n");
+  }
   /*Create vertices and indices for all tiles*/
   struct vertex vertices[VERTICES_COUNT];
   unsigned int indices[INDICES_COUNT] = {0, 1, 2, 2, 3, 0};
@@ -37,14 +42,14 @@ void createtilemap(struct tilemap *map, struct GLFWwindow *win)
       float xpos = x * TILE_SIZE;
       float ypos = y * TILE_SIZE;
       /*Get tile type*/
-      short tiletype = index % TILES_TYPE_NUMBER;
+      int tiletype = index % TILES_TYPE_NUMBER;
       map->gamemap[index].id = tiletype;
       map->gamemap[index].xcoord = xpos;
       map->gamemap[index].ycoord = ypos;
       /*Set texture coordinates*/
       float xtex = 0.0f;
       float ytex = 0.0f;
-      float texlayer = (float)tiletype;
+      int texlayer = tiletype;
       /*Set up vertices for this tile*/
       /*Bottom-left*/
       vertices[0].pos[0] = xpos;
@@ -82,7 +87,7 @@ void createtilemap(struct tilemap *map, struct GLFWwindow *win)
   }
 }
 
-void destroytilemap(struct tilemap *map)
+void destroytilemap(struct tilemap* map)
 {
   /*Destroy all tile elements*/
   for(int i = 0; i < CELLS_NUMBER; ++i){
@@ -92,12 +97,12 @@ void destroytilemap(struct tilemap *map)
   delete_texture_array(&map->texarr);
 }
 
-void updatetilemap(struct tilemap *map)
+void updatetilemap(struct tilemap* map)
 {
-  /*Update tilemap logic here if needed*/
+
 }
 
-void rendertilemap(struct tilemap *map, GLuint shaderprogram, float screenaspect)
+void rendertilemap(struct tilemap* map, GLuint shaderprogram, float screenaspect)
 {
   /*Calculate orthographic projection matrix*/
   float projection[16];

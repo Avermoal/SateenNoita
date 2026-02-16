@@ -11,7 +11,7 @@ struct scene{
 
 void initscene(struct scene *scn, struct window *win);
 
-void destroyscene(struct scene *scn);
+void destroyscene(struct scene **scn);
 
 void renderscene(struct window *win);
 

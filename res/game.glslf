@@ -8,4 +8,3 @@ out vec4 FragColor;
 void main() {
     FragColor = texture(tileTextureArray, vec3(TexCoord, TexLayer));
 }
-

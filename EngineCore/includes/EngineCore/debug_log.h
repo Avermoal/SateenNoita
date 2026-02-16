@@ -4,9 +4,11 @@
 
 #ifdef NDEBUG
 #define LOG_CRITICAL(...)
+#define LOG_INFO(...)
 #else
 #include <stdio.h>
 #define LOG_CRITICAL(...) printf("[ERROR]:"); printf(__VA_ARGS__)
+#define LOG_INFO(...) printf("[INFO]:"); printf(__VA_ARGS__)
 #endif
 
 #endif/*ENGINECORE_DEBUG_LOG_H*/

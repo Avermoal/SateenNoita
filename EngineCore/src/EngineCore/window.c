@@ -11,16 +11,25 @@
 #include "EngineCore/shader_program.h"
 #include "EngineCore/scene.h"
 
-void initwindow(struct window *pwindow, const char *title, int width, int height)
+void initwindow(struct window* pwindow, const char* title, int width, int height)
 {
+  /*GLFW hints*/
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); 
+  glfwWindowHint(GLFW_RED_BITS, 8);
+  glfwWindowHint(GLFW_GREEN_BITS, 8);
+  glfwWindowHint(GLFW_BLUE_BITS, 8);
+  glfwWindowHint(GLFW_ALPHA_BITS, 8);
+  glfwWindowHint(GLFW_DEPTH_BITS, 24);
+  glfwWindowHint(GLFW_STENCIL_BITS, 8);
+  glfwWindowHint(GLFW_SAMPLES, 4); /*MSAA 4x*/
   /*GLFW init*/
   if(!glfwInit()){
     LOG_CRITICAL("Failed init GLFW.\n");
     return;
   }
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   /*Window creation*/
   if(pwindow){
     pwindow->pwin = glfwCreateWindow(width, height, title, NULL, NULL);
@@ -61,22 +70,32 @@ void initwindow(struct window *pwindow, const char *title, int width, int height
     return;
   }
   initscene(pwindow->scn, pwindow);
+  /*Enable tests*/
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  /*INFO*/
+  LOG_INFO("OpenGL %s\n", glGetString(GL_VERSION));
+  LOG_INFO("Renderer: %s\n", glGetString(GL_RENDERER));
 }
 
-void termwindow(struct window *pwindow)
+void termwindow(struct window* pwindow)
 {
   if(pwindow->scn){
-    destroyscene(pwindow->scn);
+    destroyscene(&pwindow->scn);
   }
   destroy_shader_programs(pwindow->shp);
   glfwDestroyWindow(pwindow->pwin);
 	glfwTerminate();
 }
 
-void onupdate(struct window *pwindow)
+void onupdate(struct window* pwindow)
 {
   /*Clear window buffer*/
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  GLenum err = glGetError();
+  if(err != GL_NO_ERROR){
+    LOG_CRITICAL("x%X\n", err);
+  }
   /*Game draws*/
   renderscene(pwindow);
   /*GL swap buffeers*/

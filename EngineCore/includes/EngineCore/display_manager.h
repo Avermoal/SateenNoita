@@ -11,7 +11,7 @@
 struct vertex{
   float pos[COORDINATES];
   float tex[TEXTURE_COORDINATES];/*Texture coordinates*/
-  float texlayer;
+  int texlayer;
 };
 
 struct element{
