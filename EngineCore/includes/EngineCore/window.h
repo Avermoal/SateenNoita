@@ -9,6 +9,8 @@ struct scene;
 struct windowdata{
   int width;
   int height;
+  int fb_width;
+  int fb_height;
   const char* title;
   bool window_should_not_close;
 };

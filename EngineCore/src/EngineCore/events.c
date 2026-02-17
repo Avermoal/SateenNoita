@@ -98,12 +98,15 @@ void window_close_callback(struct GLFWwindow *pwindow)
   windata->window_should_not_close = false;
 }
 
-void window_size_callback(struct GLFWwindow *pwindow, int width, int height)
-{
-  struct windowdata *windata = (struct windowdata*)glfwGetWindowUserPointer(pwindow);
+void window_size_callback(GLFWwindow *pwindow, int width, int height) {
+  struct windowdata *windata = glfwGetWindowUserPointer(pwindow);
   windata->width = width;
   windata->height = height;
-  glViewport(0, 0, width, height);
+  int fb_w, fb_h;
+  glfwGetFramebufferSize(pwindow, &fb_w, &fb_h);
+  windata->fb_width = fb_w;
+  windata->fb_height = fb_h;
+  glViewport(0, 0, fb_w, fb_h);
 }
 
 void cursor_position_callback(struct GLFWwindow *pwindow, double xpos, double ypos)

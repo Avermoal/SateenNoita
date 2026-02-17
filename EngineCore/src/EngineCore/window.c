@@ -70,6 +70,9 @@ void initwindow(struct window* pwindow, const char* title, int width, int height
     return;
   }
   initscene(pwindow->scn, pwindow);
+  /*Get frame buffer real size*/
+  glfwGetFramebufferSize(pwindow->pwin, &pwindow->windata.fb_width, &pwindow->windata.fb_height);
+  glViewport(0, 0, pwindow->windata.fb_width, pwindow->windata.fb_height);
   /*Enable tests*/
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
