@@ -118,19 +118,19 @@ void rendertilemap(struct tilemap* map, GLuint shaderprogram, float screenaspect
   float mapheight = MAP_HEIGHT * TILE_SIZE;
   float mapaspect = mapwidth / mapheight;
   float left = 0, right = 0, bottom = 0, top = 0;
+  float visiblewidth = 0, visibleheight = 0;
   if(screenaspect > mapaspect){
-    float visible_map_width = mapheight * screenaspect;
-    left = -(visible_map_width - mapwidth) / 2.0f;
-    right = mapwidth - left;
-    bottom = 0.0f;
-    top = mapheight;
-  } else {
-    float visible_map_height = mapwidth / screenaspect;
-    left = 0.0f;
-    right = mapwidth;
-    bottom = -(visible_map_height - mapheight) / 2.0f;
-    top = mapheight - bottom;
+    visibleheight = mapheight;
+    visiblewidth = mapheight * screenaspect;
+  }else{
+    visiblewidth = mapwidth;
+    visibleheight = mapwidth / screenaspect;
   }
+
+  left = (mapwidth - visiblewidth) / 2.0f;
+  right = mapwidth - left;
+  bottom = (mapheight - visibleheight) / 2.0f;
+  top = mapheight - bottom;
   create_ortho_projection(projection, left, right, bottom, top);
   /*Send orthographic projection matrix to shader*/
   GLuint projectionloc = glGetUniformLocation(shaderprogram, "projview");

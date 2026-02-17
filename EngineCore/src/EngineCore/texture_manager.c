@@ -103,6 +103,10 @@ void load_texture_array(struct texturearray* texarr, GLint size_in_pixels, GLuin
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, size_in_pixels, size_in_pixels, 1, GL_RGBA, GL_UNSIGNED_BYTE, img);
     stbi_image_free(img);
   }
+  /*Free memory section*/
+  for(GLuint i = 0; i < layers; ++i){
+    free(texture_files[i]);
+  }
   /*Set texture array data*/
   texarr->id = texarr_id;
   texarr->size_in_pixels = size_in_pixels;
