@@ -154,6 +154,11 @@ texnumber get_textures_number(const char* path_to_dir)
   return texnum;
 }
 
+static int cmpstr(const void* a, const void* b)
+{
+  return strcmp(*(const char**)a, *(const char**)b);
+}
+
 void get_textures_names(texnumber texnum, char* tex_files[texnum], const char* path_to_dir)
 {
   DIR* dirp = opendir(path_to_dir);
@@ -167,5 +172,6 @@ void get_textures_names(texnumber texnum, char* tex_files[texnum], const char* p
       }
     }
     closedir(dirp);
+    qsort(tex_files, tn, sizeof(char*), cmpstr);
   }
 }
