@@ -10,6 +10,7 @@
 #include "EngineCore/events.h"
 #include "EngineCore/shader_program.h"
 #include "EngineCore/scene.h"
+#include "EngineCore/player_move_system.h"
 
 void initwindow(struct window* pwindow, const char* title, int width, int height)
 {
@@ -95,18 +96,18 @@ void onupdate(struct window* pwindow)
 {
   /*Clear window buffer*/
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  #ifndef NDEBUG
   GLenum err = glGetError();
   if(err != GL_NO_ERROR){
     LOG_CRITICAL("x%X\n", err);
   }
+  #endif
   /*Game draws*/
   renderscene(pwindow);
   /*GL swap buffeers*/
   glfwSwapBuffers(pwindow->pwin);
   /*Game actions*/
-  if(jclicked(GLFW_MOUSE_BUTTON_1)){
-    glClearColor(0.4f, 1.0f, 0.3f, 1.0f);
-  }
+  player_move_handler(pwindow);
   /*Poll for process events*/
   pollevents();
 }
