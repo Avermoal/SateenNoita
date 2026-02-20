@@ -12,6 +12,8 @@ struct windowdata{
   int fb_width;
   int fb_height;
   const char* title;
+  double curtime;
+  double last_move_time;
   bool window_should_not_close;
 };
 

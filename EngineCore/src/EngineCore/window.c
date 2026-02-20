@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -55,6 +56,7 @@ void initwindow(struct window* pwindow, const char* title, int width, int height
   pwindow->windata.height = height;
   pwindow->windata.title = title;
   pwindow->windata.window_should_not_close = true;
+  pwindow->windata.last_move_time = 0.0;
   /*Set OpenGL window user pointer*/
   glfwSetWindowUserPointer(pwindow->pwin, &pwindow->windata);
   /*Shader program load*/
@@ -92,6 +94,13 @@ void termwindow(struct window* pwindow)
 	glfwTerminate();
 }
 
+static double gettime()
+{
+  struct timespec ts;
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+  return ts.tv_sec + ts.tv_nsec / 1e9;
+}
+
 void onupdate(struct window* pwindow)
 {
   /*Clear window buffer*/
@@ -107,6 +116,7 @@ void onupdate(struct window* pwindow)
   /*GL swap buffeers*/
   glfwSwapBuffers(pwindow->pwin);
   /*Game actions*/
+  pwindow->windata.curtime = gettime();
   player_move_handler(pwindow);
   /*Poll for process events*/
   pollevents();

@@ -6,20 +6,23 @@
 
 enum MOVE_TO_TILE{
   MT_FT, /*MOVE_TO_FRONT_TILE*/
-  MT_FRT,
   MT_RT,
-  MT_DRT,
   MT_DT,
-  MT_DLT,
   MT_LT,
-  MT_FLT
 };
 
 enum TILE_TYPE{
+  /*SYSTEM TILES*/
   ID_000000_ERROR = 0,
+
+  /*GROUND TILES*/
   ID_000001_GROUND = 1,
   ID_000002_GRASS = 2,
   ID_000003_WALL = 3,
+
+  /*EFFECT TILES*/
+
+  /*MOBS TILES*/
   ID_000004_PLAYER = 4,
 
 

@@ -16,8 +16,8 @@
 #define INDICES_COUNT 6
 #define TEX_SHIFT 1.0f
 #define GROUND_LAYER 0.0f
-#define MOBS_LAYER 0.5f
-#define EFFECT_LAYER 1.0f
+#define MOBS_LAYER 1.0f
+#define EFFECT_LAYER 2.0f
 
 #define PATH_TO_TEXTURES "res/textures"
 
@@ -54,7 +54,7 @@ void createtilemap(struct tilemap* map, struct GLFWwindow* win)
   struct vertex vertices[VERTICES_COUNT];
   unsigned int indices[INDICES_COUNT] = {0, 1, 2, 2, 3, 0};
   /*Map pregenerate*/
-  int tiletype[MAP_HEIGHT][MAP_WIDTH];
+  struct tile tiletype[MAP_HEIGHT][MAP_WIDTH];
   mapgen(MAP_HEIGHT, MAP_WIDTH, tiletype, SEED, MAP_START, MAP_START);
   /*Initialize all tiles with their elements*/
   for (int i = 0, y = 0; y < MAP_HEIGHT; y++) {
@@ -63,13 +63,13 @@ void createtilemap(struct tilemap* map, struct GLFWwindow* win)
       const float xpos = x * TILE_SIZE;
       const float ypos = y * TILE_SIZE;
       /*Get tile type*/
-      map->gmap.groundmap[y][x].id = tiletype[y][x];
+      map->gmap.groundmap[y][x].id = tiletype[y][x].id;
       map->gmap.groundmap[y][x].xcoord = xpos;
       map->gmap.groundmap[y][x].ycoord = ypos;
       /*Set texture coordinates*/
       const float xtex = 0.0f;
       const float ytex = 0.0f;
-      const int texlayer = tiletype[y][x];
+      const int texlayer = tiletype[y][x].id;
       /*Setup vertices for this tile*/
       /*Bottom-left*/
       vertices[0].pos[0] = xpos;
@@ -100,7 +100,6 @@ void createtilemap(struct tilemap* map, struct GLFWwindow* win)
       vertices[3].tex[1] = ytex + TEX_SHIFT;
       vertices[3].texlayer = texlayer;
       /*Create OpenGL element for this tile*/
-      map->gmap.groundmap[y][x].isobstacle = false;
       map->gmap.groundmap[y][x].tile = createelement(vertices, VERTICES_COUNT, 
                                                indices, INDICES_COUNT, 
                                                true, GL_STATIC_DRAW);
@@ -139,12 +138,13 @@ void createtilemap(struct tilemap* map, struct GLFWwindow* win)
   vertices[3].tex[0] = xtex;
   vertices[3].tex[1] = ytex + TEX_SHIFT;
   vertices[3].texlayer = ID_000004_PLAYER;
-  /*Set player on place*/
+  /*Set player on place and player properties*/
   map->gmap.pcx = PLAYER_START_COORDX;
   map->gmap.pcy = PLAYER_START_COORDY;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].isobstacle = true;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].xcoord = xpos;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].ycoord = ypos;
+  map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].id = ID_000004_PLAYER;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].tile = createelement(vertices, VERTICES_COUNT, 
                                                                           indices, INDICES_COUNT, 
                                                                           true, GL_STATIC_DRAW);
@@ -212,12 +212,13 @@ void rendertilemap(struct tilemap* map, GLuint shaderprogram, float screenaspect
   }
 }
 
-static void update_tile_position(struct tile* t, float x, float y) {
-  if (t->tile.vao == 0 || t->tile.vbo == 0){
+static void update_tile_position(struct tile* t, float x, float y)
+{
+  if(t->tile.vao == 0 || t->tile.vbo == 0){
     return;
   }
   /*Z-coord defines*/
-  float layer = (t->id == ID_000004_PLAYER) ? MOBS_LAYER : GROUND_LAYER;
+  float layer = (t->id != ID_000004_PLAYER) ? GROUND_LAYER : MOBS_LAYER;
   /*Texture params*/
   const float xtex = 0.0f, ytex = 0.0f;
   struct vertex verts[VERTICES_COUNT];
@@ -257,11 +258,11 @@ static void update_tile_position(struct tile* t, float x, float y) {
   t->ycoord = y;
 }
 
-static void nearest_swap_tile(struct tile (*map)[MAP_WIDTH], int h1, int w1, int h2, int w2)
+static bool nearest_swap_tile(struct tile (*map)[MAP_WIDTH], int h1, int w1, int h2, int w2)
 {
   if(h1 < 0 || h1 >= MAP_HEIGHT || w1 < 0 || w1 >= MAP_WIDTH ||
      h2 < 0 || h2 >= MAP_HEIGHT || w2 < 0 || w2 >= MAP_WIDTH){
-    return;
+    return false;
   }
   struct tile temp = map[h1][w1];
   map[h1][w1] = map[h2][w2];
@@ -269,6 +270,7 @@ static void nearest_swap_tile(struct tile (*map)[MAP_WIDTH], int h1, int w1, int
   /*Update tile position*/
   update_tile_position(&map[h1][w1], w1 * TILE_SIZE, h1 * TILE_SIZE);
   update_tile_position(&map[h2][w2], w2 * TILE_SIZE, h2 * TILE_SIZE);
+  return true;
 }
 
 void move_mob_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T)
@@ -276,54 +278,30 @@ void move_mob_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T)
   #define MOVE 1
   if(MT_T == MT_FT){
     if(!gmap->groundmap[gmap->pcy + MOVE][gmap->pcx].isobstacle && !gmap->mobs[gmap->pcy + MOVE][gmap->pcx].isobstacle){
-      nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy + MOVE, gmap->pcx);
-      gmap->pcy += MOVE;
-    }
-  }
-  if(MT_T == MT_FRT){
-    if(!gmap->groundmap[gmap->pcy + MOVE][gmap->pcx + MOVE].isobstacle && !gmap->mobs[gmap->pcy + MOVE][gmap->pcx + MOVE].isobstacle){
-      nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy + MOVE, gmap->pcx);
-      gmap->pcy += MOVE;
-      gmap->pcx += MOVE;
+      if(nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy + MOVE, gmap->pcx)){
+        gmap->pcy += MOVE;
+      }
     }
   }
   if(MT_T == MT_RT){
     if(!gmap->groundmap[gmap->pcy][gmap->pcx + MOVE].isobstacle && !gmap->mobs[gmap->pcy][gmap->pcx + MOVE].isobstacle){
-      nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy + MOVE, gmap->pcx);
-      gmap->pcx += MOVE;
-    }
-  }
-  if(MT_T == MT_DRT){
-    if(!gmap->groundmap[gmap->pcy - MOVE][gmap->pcx + MOVE].isobstacle && !gmap->mobs[gmap->pcy - MOVE][gmap->pcx + MOVE].isobstacle){
-      nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy + MOVE, gmap->pcx);
-      gmap->pcy -= MOVE;
-      gmap->pcx += MOVE;
+      if(nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy, gmap->pcx + MOVE)){
+        gmap->pcx += MOVE;
+      }
     }
   }
   if(MT_T == MT_DT){
     if(!gmap->groundmap[gmap->pcy - MOVE][gmap->pcx].isobstacle && !gmap->mobs[gmap->pcy - MOVE][gmap->pcx].isobstacle){
-      nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy + MOVE, gmap->pcx);
-      gmap->pcy -= MOVE;
-    }
-  }
-  if(MT_T == MT_DLT){
-    if(!gmap->groundmap[gmap->pcy - MOVE][gmap->pcx - MOVE].isobstacle && !gmap->mobs[gmap->pcy - MOVE][gmap->pcx - MOVE].isobstacle){
-      nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy + MOVE, gmap->pcx);
-      gmap->pcy -= MOVE;
-      gmap->pcx -= MOVE;
+      if(nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy - MOVE, gmap->pcx)){
+        gmap->pcy -= MOVE;
+      }
     }
   }
   if(MT_T == MT_LT){
     if(!gmap->groundmap[gmap->pcy][gmap->pcx - MOVE].isobstacle && !gmap->mobs[gmap->pcy][gmap->pcx - MOVE].isobstacle){
-      nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy + MOVE, gmap->pcx);
-      gmap->pcx -= MOVE;
-    }
-  }
-  if(MT_T == MT_FLT){
-    if(!gmap->groundmap[gmap->pcy + MOVE][gmap->pcx - MOVE].isobstacle && !gmap->mobs[gmap->pcy + MOVE][gmap->pcx - MOVE].isobstacle){
-      nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy + MOVE, gmap->pcx);
-      gmap->pcy += MOVE;
-      gmap->pcx -= MOVE;
+      if(nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy, gmap->pcx - MOVE)){
+        gmap->pcx -= MOVE;
+      }
     }
   }
 }
