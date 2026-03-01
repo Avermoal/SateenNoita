@@ -116,35 +116,35 @@ void createtilemap(struct tilemap* map, struct GLFWwindow* win)
   vertices[0].pos[2] = MOBS_LAYER;
   vertices[0].tex[0] = xtex;
   vertices[0].tex[1] = ytex;
-  vertices[0].texlayer = ID_000004_PLAYER;
+  vertices[0].texlayer = ID_000010_PLAYER;
   /*Bottom-right*/
   vertices[1].pos[0] = xpos + TILE_SIZE;
   vertices[1].pos[1] = ypos;
   vertices[1].pos[2] = MOBS_LAYER;
   vertices[1].tex[0] = xtex + TEX_SHIFT;
   vertices[1].tex[1] = ytex;
-  vertices[1].texlayer = ID_000004_PLAYER;
+  vertices[1].texlayer = ID_000010_PLAYER;
   /*Top-right*/
   vertices[2].pos[0] = xpos + TILE_SIZE;
   vertices[2].pos[1] = ypos + TILE_SIZE;
   vertices[2].pos[2] = MOBS_LAYER;
   vertices[2].tex[0] = xtex + TEX_SHIFT;
   vertices[2].tex[1] = ytex + TEX_SHIFT;
-  vertices[2].texlayer = ID_000004_PLAYER;
+  vertices[2].texlayer = ID_000010_PLAYER;
   /*Top-left*/
   vertices[3].pos[0] = xpos;
   vertices[3].pos[1] = ypos + TILE_SIZE;
   vertices[3].pos[2] = MOBS_LAYER;
   vertices[3].tex[0] = xtex;
   vertices[3].tex[1] = ytex + TEX_SHIFT;
-  vertices[3].texlayer = ID_000004_PLAYER;
+  vertices[3].texlayer = ID_000010_PLAYER;
   /*Set player on place and player properties*/
   map->gmap.pcx = PLAYER_START_COORDX;
   map->gmap.pcy = PLAYER_START_COORDY;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].isobstacle = true;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].xcoord = xpos;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].ycoord = ypos;
-  map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].id = ID_000004_PLAYER;
+  map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].id = ID_000010_PLAYER;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].tile = createelement(vertices, VERTICES_COUNT, 
                                                                           indices, INDICES_COUNT, 
                                                                           true, GL_STATIC_DRAW);
@@ -218,7 +218,7 @@ static void update_tile_position(struct tile* t, float x, float y)
     return;
   }
   /*Z-coord defines*/
-  float layer = (t->id != ID_000004_PLAYER) ? GROUND_LAYER : MOBS_LAYER;
+  float layer = (t->id != ID_000010_PLAYER) ? GROUND_LAYER : MOBS_LAYER;
   /*Texture params*/
   const float xtex = 0.0f, ytex = 0.0f;
   struct vertex verts[VERTICES_COUNT];
