@@ -12,6 +12,7 @@
 #include "EngineCore/shader_program.h"
 #include "EngineCore/scene.h"
 #include "EngineCore/player_move_system.h"
+#include "EngineCore/mobs_move_system.h"
 
 void initwindow(struct window* pwindow, const char* title, int width, int height)
 {
@@ -117,7 +118,9 @@ void onupdate(struct window* pwindow)
   glfwSwapBuffers(pwindow->pwin);
   /*Game actions*/
   pwindow->windata.curtime = gettime();
-  player_move_handler(pwindow);
+  if(player_move_handler(pwindow)){
+    mobs_move_handler(pwindow);
+  }
   /*Game scene update*/
   updatescene(pwindow->scn);
   /*Poll for process events*/

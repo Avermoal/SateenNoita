@@ -45,6 +45,9 @@ void updatetilemap(struct tilemap* map);
 
 void rendertilemap(struct tilemap* map, GLuint shaderprogram, float screenaspect);
 
+bool nearest_swap_tile(struct tile (*map)[MAP_WIDTH], int h1, int w1, int h2, int w2);
+
 void move_player_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T);
+void move_mob_on_place(struct gamemap* gmap);
 
 #endif/*ENGINECORE_TIELS_MAP_H*/

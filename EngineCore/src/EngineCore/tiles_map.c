@@ -347,7 +347,7 @@ static void update_tile_position(struct tile* t, float x, float y)
   t->ycoord = y;
 }
 
-static bool nearest_swap_tile(struct tile (*map)[MAP_WIDTH], int h1, int w1, int h2, int w2)
+bool nearest_swap_tile(struct tile (*map)[MAP_WIDTH], int h1, int w1, int h2, int w2)
 {
   if(h1 < 0 || h1 >= MAP_HEIGHT || w1 < 0 || w1 >= MAP_WIDTH ||
      h2 < 0 || h2 >= MAP_HEIGHT || w2 < 0 || w2 >= MAP_WIDTH){
@@ -435,11 +435,6 @@ static void destroy_last_map_line(struct tilemap* map)
   }
 }
 
-static void move_mobs(struct gamemap* gmap)
-{
-  
-}
-
 void updatetilemap(struct tilemap* map)
 {
   if(map->gmap.pcy > map->gmap.border){
@@ -453,8 +448,6 @@ void updatetilemap(struct tilemap* map)
       }
     }
     add_first_map_line(map);
-    /* @TODO UPDATE MOBS (ENEMY) PLACES*/
-    move_mobs(&map->gmap);
     --(map->gmap.pcy);
     move_player_on_place(&map->gmap, MT_DT);
   }
