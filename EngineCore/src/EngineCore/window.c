@@ -118,6 +118,8 @@ void onupdate(struct window* pwindow)
   /*Game actions*/
   pwindow->windata.curtime = gettime();
   player_move_handler(pwindow);
+  /*Game scene update*/
+  updatescene(pwindow->scn);
   /*Poll for process events*/
   pollevents();
 }

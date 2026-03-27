@@ -61,5 +61,5 @@ void renderscene(struct window* win)
 
 void updatescene(struct scene* scn)
 {
-  
+  updatetilemap(&scn->map);
 }

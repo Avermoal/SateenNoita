@@ -22,10 +22,137 @@
 #define PATH_TO_TEXTURES "res/textures"
 
 #define MAP_START 0
-#define PLAYER_START_COORDX 6
-#define PLAYER_START_COORDY 2
+#define PLAYER_START_COORDX 9
+#define PLAYER_START_COORDY 3
+#define PLAYER_BORDER_COORD (int)(MAP_HEIGHT / 2)
 
 #define SEED 1234567
+
+static void set_mobs(struct gamemap* gmap, int lbc, bool is_new_line)
+{
+  /*Create vertices and indices for all tiles*/
+  struct vertex vertices[VERTICES_COUNT];
+  unsigned int indices[INDICES_COUNT] = {0, 1, 2, 2, 3, 0};
+  /*Place mobs on map*/
+  if(is_new_line){
+    struct tile tiletype[1][MAP_WIDTH];
+    mapgen(1, MAP_WIDTH, tiletype, lbc, MOBS_TILE);
+    for (int x = 0; x < MAP_WIDTH; ++x){
+      /*VOID CHECK*/
+      if(tiletype[0][x].id == ID_000000_VOID){
+        gmap->mobs[MAP_HEIGHT - 1][x].tile.vao = 0;
+        gmap->mobs[MAP_HEIGHT - 1][x].id = ID_000000_VOID;
+        gmap->mobs[MAP_HEIGHT - 1][x].isobstacle = false;
+        continue;
+      }
+      /*Calculate tile coordinates in pixels*/
+      const float xpos = x * TILE_SIZE;
+      const float ypos = (MAP_HEIGHT - 1) * TILE_SIZE;
+      /*Get tile type*/
+      gmap->mobs[MAP_HEIGHT - 1][x].id = tiletype[0][x].id;
+      gmap->mobs[MAP_HEIGHT - 1][x].xcoord = xpos;
+      gmap->mobs[MAP_HEIGHT - 1][x].ycoord = ypos;
+      gmap->mobs[MAP_HEIGHT - 1][x].isobstacle = tiletype[0][x].isobstacle;
+      gmap->mobs[MAP_HEIGHT - 1][x].layer = MOBS_LAYER;
+      /*Set texture coordinates*/
+      const float xtex = 0.0f;
+      const float ytex = 0.0f;
+      const int texlayer = tiletype[0][x].id;
+      /*Setup vertices for this tile*/
+      /*Bottom-left*/
+      vertices[0].pos[0] = xpos;
+      vertices[0].pos[1] = ypos;
+      vertices[0].pos[2] = MOBS_LAYER;
+      vertices[0].tex[0] = xtex;
+      vertices[0].tex[1] = ytex;
+      vertices[0].texlayer = texlayer;
+      /*Bottom-right*/
+      vertices[1].pos[0] = xpos + TILE_SIZE;
+      vertices[1].pos[1] = ypos;
+      vertices[1].pos[2] = MOBS_LAYER;
+      vertices[1].tex[0] = xtex + TEX_SHIFT;
+      vertices[1].tex[1] = ytex;
+      vertices[1].texlayer = texlayer;
+      /*Top-right*/
+      vertices[2].pos[0] = xpos + TILE_SIZE;
+      vertices[2].pos[1] = ypos + TILE_SIZE;
+      vertices[2].pos[2] = MOBS_LAYER;
+      vertices[2].tex[0] = xtex + TEX_SHIFT;
+      vertices[2].tex[1] = ytex + TEX_SHIFT;
+      vertices[2].texlayer = texlayer;
+      /*Top-left*/
+      vertices[3].pos[0] = xpos;
+      vertices[3].pos[1] = ypos + TILE_SIZE;
+      vertices[3].pos[2] = MOBS_LAYER;
+      vertices[3].tex[0] = xtex;
+      vertices[3].tex[1] = ytex + TEX_SHIFT;
+      vertices[3].texlayer = texlayer;
+      /*Create OpenGL element for this tile*/
+      gmap->mobs[MAP_HEIGHT - 1][x].tile = createelement(vertices, VERTICES_COUNT, 
+                                             indices, INDICES_COUNT, 
+                                             true, GL_STATIC_DRAW);
+    }
+  }else{
+    struct tile tiletype[MAP_HEIGHT][MAP_WIDTH];
+    mapgen(MAP_HEIGHT, MAP_WIDTH, tiletype, lbc, MOBS_TILE);
+    /*Initialize all mobs tiles with their elements*/
+    for (int y = 0; y < MAP_HEIGHT; ++y){
+      for (int x = 0; x < MAP_WIDTH; ++x){
+        /*VOID CHECK*/
+        if(tiletype[y][x].id == ID_000000_VOID){
+          gmap->mobs[y][x].tile.vao = 0;
+          continue;
+        }
+        /*Calculate tile coordinates in pixels*/
+        const float xpos = x * TILE_SIZE;
+        const float ypos = y * TILE_SIZE;
+        /*Get tile type*/
+        gmap->mobs[y][x].id = tiletype[y][x].id;
+        gmap->mobs[y][x].xcoord = xpos;
+        gmap->mobs[y][x].ycoord = ypos;
+        gmap->mobs[y][x].isobstacle = tiletype[y][x].isobstacle;
+        gmap->mobs[y][x].layer = MOBS_LAYER;
+        /*Set texture coordinates*/
+        const float xtex = 0.0f;
+        const float ytex = 0.0f;
+        const int texlayer = tiletype[y][x].id;
+        /*Setup vertices for this tile*/
+      /*Bottom-left*/
+        vertices[0].pos[0] = xpos;
+        vertices[0].pos[1] = ypos;
+        vertices[0].pos[2] = MOBS_LAYER;
+        vertices[0].tex[0] = xtex;
+        vertices[0].tex[1] = ytex;
+        vertices[0].texlayer = texlayer;
+        /*Bottom-right*/
+        vertices[1].pos[0] = xpos + TILE_SIZE;
+        vertices[1].pos[1] = ypos;
+        vertices[1].pos[2] = MOBS_LAYER;
+        vertices[1].tex[0] = xtex + TEX_SHIFT;
+        vertices[1].tex[1] = ytex;
+        vertices[1].texlayer = texlayer;
+        /*Top-right*/
+        vertices[2].pos[0] = xpos + TILE_SIZE;
+        vertices[2].pos[1] = ypos + TILE_SIZE;
+        vertices[2].pos[2] = MOBS_LAYER;
+        vertices[2].tex[0] = xtex + TEX_SHIFT;
+        vertices[2].tex[1] = ytex + TEX_SHIFT;
+        vertices[2].texlayer = texlayer;
+        /*Top-left*/
+        vertices[3].pos[0] = xpos;
+        vertices[3].pos[1] = ypos + TILE_SIZE;
+        vertices[3].pos[2] = MOBS_LAYER;
+        vertices[3].tex[0] = xtex;
+        vertices[3].tex[1] = ytex + TEX_SHIFT;
+        vertices[3].texlayer = texlayer;
+        /*Create OpenGL element for this tile*/
+        gmap->mobs[y][x].tile = createelement(vertices, VERTICES_COUNT, 
+                                                 indices, INDICES_COUNT, 
+                                                   true, GL_STATIC_DRAW);
+      }
+    }
+  }
+}
 
 void createtilemap(struct tilemap* map, struct GLFWwindow* win)
 {
@@ -54,11 +181,14 @@ void createtilemap(struct tilemap* map, struct GLFWwindow* win)
   struct vertex vertices[VERTICES_COUNT];
   unsigned int indices[INDICES_COUNT] = {0, 1, 2, 2, 3, 0};
   /*Map pregenerate*/
+  map->gmap.border = PLAYER_BORDER_COORD;
+  init_map_generator(SEED);
   struct tile tiletype[MAP_HEIGHT][MAP_WIDTH];
-  mapgen(MAP_HEIGHT, MAP_WIDTH, tiletype, SEED, MAP_START, MAP_START);
-  /*Initialize all tiles with their elements*/
-  for (int i = 0, y = 0; y < MAP_HEIGHT; y++) {
-    for (int x = 0; x < MAP_WIDTH; x++) {
+  mapgen(MAP_HEIGHT, MAP_WIDTH, tiletype, MAP_START, GROUND_TILE);
+  set_mobs(&map->gmap, MAP_START, false);
+  /*Initialize all gound tiles with their elements*/
+  for (int y = 0; y < MAP_HEIGHT; ++y) {
+    for (int x = 0; x < MAP_WIDTH; ++x) {
       /*Calculate tile coordinates in pixels*/
       const float xpos = x * TILE_SIZE;
       const float ypos = y * TILE_SIZE;
@@ -66,6 +196,8 @@ void createtilemap(struct tilemap* map, struct GLFWwindow* win)
       map->gmap.groundmap[y][x].id = tiletype[y][x].id;
       map->gmap.groundmap[y][x].xcoord = xpos;
       map->gmap.groundmap[y][x].ycoord = ypos;
+      map->gmap.groundmap[y][x].isobstacle = tiletype[y][x].isobstacle;
+      map->gmap.groundmap[y][x].layer = GROUND_LAYER;
       /*Set texture coordinates*/
       const float xtex = 0.0f;
       const float ytex = 0.0f;
@@ -145,6 +277,7 @@ void createtilemap(struct tilemap* map, struct GLFWwindow* win)
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].xcoord = xpos;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].ycoord = ypos;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].id = ID_000010_PLAYER;
+  map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].layer = MOBS_LAYER;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].tile = createelement(vertices, VERTICES_COUNT, 
                                                                           indices, INDICES_COUNT, 
                                                                           true, GL_STATIC_DRAW);
@@ -168,57 +301,13 @@ void destroytilemap(struct tilemap* map)
   delete_texture_array(&map->texarr);
 }
 
-void updatetilemap(struct tilemap* map)
-{
-
-}
-
-void rendertilemap(struct tilemap* map, GLuint shaderprogram, float screenaspect)
-{
-  /*Calculate orthographic projection matrix*/
-  float projection[16];
-  float mapwidth = MAP_WIDTH * TILE_SIZE;
-  float mapheight = MAP_HEIGHT * TILE_SIZE;
-  float mapaspect = mapwidth / mapheight;
-  float left = 0, right = 0, bottom = 0, top = 0;
-  float visiblewidth = 0, visibleheight = 0;
-  if(screenaspect > mapaspect){
-    visibleheight = mapheight;
-    visiblewidth = mapheight * screenaspect;
-  }else{
-    visiblewidth = mapwidth;
-    visibleheight = mapwidth / screenaspect;
-  }
-
-  left = (mapwidth - visiblewidth) / 2.0f;
-  right = mapwidth - left;
-  bottom = (mapheight - visibleheight) / 2.0f;
-  top = mapheight - bottom;
-  create_ortho_projection(projection, left, right, bottom, top);
-  /*Send orthographic projection matrix to shader*/
-  GLuint projectionloc = glGetUniformLocation(shaderprogram, "projview");
-  glUniformMatrix4fv(projectionloc, 1, GL_FALSE, projection); 
-  /*Render all tiles*/
-  for(int y = 0; y < MAP_HEIGHT; ++y){
-    for(int x = 0; x < MAP_WIDTH; ++x){
-      displayelement(map->gmap.groundmap[y][x].tile);
-      if(map->gmap.mobs[y][x].tile.vao != 0){
-        displayelement(map->gmap.mobs[y][x].tile);
-      }
-      if(map->gmap.effect[y][x].tile.vao != 0){
-        displayelement(map->gmap.effect[y][x].tile);
-      }
-    }
-  }
-}
-
 static void update_tile_position(struct tile* t, float x, float y)
 {
   if(t->tile.vao == 0 || t->tile.vbo == 0){
     return;
   }
   /*Z-coord defines*/
-  float layer = (t->id != ID_000010_PLAYER) ? GROUND_LAYER : MOBS_LAYER;
+  float layer = t->layer;
   /*Texture params*/
   const float xtex = 0.0f, ytex = 0.0f;
   struct vertex verts[VERTICES_COUNT];
@@ -273,7 +362,144 @@ static bool nearest_swap_tile(struct tile (*map)[MAP_WIDTH], int h1, int w1, int
   return true;
 }
 
-void move_mob_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T)
+static void add_first_map_line(struct tilemap* map)
+{
+  /*Create vertices and indices for all tiles*/
+  struct vertex vertices[VERTICES_COUNT];
+  unsigned int indices[INDICES_COUNT] = {0, 1, 2, 2, 3, 0};
+  /*New line map gen*/
+  struct tile tiletype[1][MAP_WIDTH];
+  mapgen(1, MAP_WIDTH, tiletype, map->gmap.genoffset, GROUND_TILE);
+  ++(map->gmap.genoffset);
+  for (int x = 0; x < MAP_WIDTH; ++x) {
+    /*Calculate tile coordinates in pixels*/
+    const float xpos = x * TILE_SIZE;
+    const float ypos = (MAP_HEIGHT - 1) * TILE_SIZE;
+    /*Get tile type*/
+    map->gmap.groundmap[MAP_HEIGHT - 1][x].id = tiletype[0][x].id;
+    map->gmap.groundmap[MAP_HEIGHT - 1][x].xcoord = xpos;
+    map->gmap.groundmap[MAP_HEIGHT - 1][x].ycoord = ypos;
+    map->gmap.groundmap[MAP_HEIGHT - 1][x].isobstacle = tiletype[0][x].isobstacle;
+    map->gmap.groundmap[MAP_HEIGHT - 1][x].layer = GROUND_LAYER;
+    /*Set texture coordinates*/
+    const float xtex = 0.0f;
+    const float ytex = 0.0f;
+    const int texlayer = tiletype[0][x].id;
+    /*Setup vertices for this tile*/
+    /*Bottom-left*/
+    vertices[0].pos[0] = xpos;
+    vertices[0].pos[1] = ypos;
+    vertices[0].pos[2] = GROUND_LAYER;
+    vertices[0].tex[0] = xtex;
+    vertices[0].tex[1] = ytex;
+    vertices[0].texlayer = texlayer;
+    /*Bottom-right*/
+    vertices[1].pos[0] = xpos + TILE_SIZE;
+    vertices[1].pos[1] = ypos;
+    vertices[1].pos[2] = GROUND_LAYER;
+    vertices[1].tex[0] = xtex + TEX_SHIFT;
+    vertices[1].tex[1] = ytex;
+    vertices[1].texlayer = texlayer;
+    /*Top-right*/
+    vertices[2].pos[0] = xpos + TILE_SIZE;
+    vertices[2].pos[1] = ypos + TILE_SIZE;
+    vertices[2].pos[2] = GROUND_LAYER;
+    vertices[2].tex[0] = xtex + TEX_SHIFT;
+    vertices[2].tex[1] = ytex + TEX_SHIFT;
+    vertices[2].texlayer = texlayer;
+    /*Top-left*/
+    vertices[3].pos[0] = xpos;
+    vertices[3].pos[1] = ypos + TILE_SIZE;
+    vertices[3].pos[2] = GROUND_LAYER;
+    vertices[3].tex[0] = xtex;
+    vertices[3].tex[1] = ytex + TEX_SHIFT;
+    vertices[3].texlayer = texlayer;
+    /*Create OpenGL element for this tile*/
+    map->gmap.groundmap[MAP_HEIGHT - 1][x].tile = createelement(vertices, VERTICES_COUNT, 
+                                             indices, INDICES_COUNT, 
+                                             true, GL_STATIC_DRAW);
+  }
+  set_mobs(&map->gmap, map->gmap.genoffset, true);
+}
+
+static void destroy_last_map_line(struct tilemap* map)
+{
+  for(int x = 0; x <  MAP_WIDTH; ++x){
+    destroyelement(&map->gmap.groundmap[0][x].tile);
+    if(map->gmap.mobs[0][x].tile.vao != 0){
+      destroyelement(&map->gmap.mobs[0][x].tile);
+    }
+    if(map->gmap.effect[0][x].tile.vao != 0){
+      destroyelement(&map->gmap.effect[0][x].tile);
+    }
+  }
+}
+
+static void move_mobs(struct gamemap* gmap)
+{
+  
+}
+
+void updatetilemap(struct tilemap* map)
+{
+  if(map->gmap.pcy > map->gmap.border){
+    destroy_last_map_line(map);
+    for(int y = 0; y < MAP_HEIGHT - 1; ++y){
+      for(int x = 0; x < MAP_WIDTH; ++x){
+        /*Swap lines*/
+        nearest_swap_tile(map->gmap.groundmap, y, x, y + 1, x);
+        nearest_swap_tile(map->gmap.mobs, y, x, y + 1, x);
+        nearest_swap_tile(map->gmap.effect, y, x, y + 1, x);
+      }
+    }
+    add_first_map_line(map);
+    /* @TODO UPDATE MOBS (ENEMY) PLACES*/
+    move_mobs(&map->gmap);
+    --(map->gmap.pcy);
+    move_player_on_place(&map->gmap, MT_DT);
+  }
+}
+
+void rendertilemap(struct tilemap* map, GLuint shaderprogram, float screenaspect)
+{
+  /*Calculate orthographic projection matrix*/
+  float projection[16];
+  float mapwidth = MAP_WIDTH * TILE_SIZE;
+  float mapheight = MAP_HEIGHT * TILE_SIZE;
+  float mapaspect = mapwidth / mapheight;
+  float left = 0, right = 0, bottom = 0, top = 0;
+  float visiblewidth = 0, visibleheight = 0;
+  if(screenaspect > mapaspect){
+    visibleheight = mapheight;
+    visiblewidth = mapheight * screenaspect;
+  }else{
+    visiblewidth = mapwidth;
+    visibleheight = mapwidth / screenaspect;
+  }
+
+  left = (mapwidth - visiblewidth) / 2.0f;
+  right = mapwidth - left;
+  bottom = (mapheight - visibleheight) / 2.0f;
+  top = mapheight - bottom;
+  create_ortho_projection(projection, left, right, bottom, top);
+  /*Send orthographic projection matrix to shader*/
+  GLuint projectionloc = glGetUniformLocation(shaderprogram, "projview");
+  glUniformMatrix4fv(projectionloc, 1, GL_FALSE, projection); 
+  /*Render all tiles*/
+  for(int y = 0; y < MAP_HEIGHT; ++y){
+    for(int x = 0; x < MAP_WIDTH; ++x){
+      displayelement(map->gmap.groundmap[y][x].tile);
+      if(map->gmap.mobs[y][x].tile.vao != 0){
+        displayelement(map->gmap.mobs[y][x].tile);
+      }
+      if(map->gmap.effect[y][x].tile.vao != 0){
+        displayelement(map->gmap.effect[y][x].tile);
+      }
+    }
+  }
+}
+
+void move_player_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T)
 {
   #define MOVE 1
   if(MT_T == MT_FT){

@@ -5,13 +5,13 @@ set(ENGINE_CORE_NAME EngineCore)
 set(MATH_PRIVATE_INCLUDES
   includes/Mathematics/vector.h
   includes/Mathematics/ortho_projection.h
-  includes/Mathematics/perlin_noise.h
+  includes/Mathematics/noises.h
 )
 
 set(MATH_PRIVATE_SOURCES
   src/Mathematics/vector.c
   src/Mathematics/ortho_projection.c
-  src/Mathematics/perlin_noise.c
+  src/Mathematics/noises.c
 )
 
 set(ENGINE_PUBLIC_INCLUDES

@@ -5,8 +5,8 @@
 #include "EngineCore/texture_manager.h"
 #include "EngineCore/tiles_info.h"
 
-#define MAP_WIDTH 13
-#define MAP_HEIGHT 17
+#define MAP_WIDTH 19
+#define MAP_HEIGHT 23
 
 struct GLFWwindow;
 
@@ -16,6 +16,7 @@ struct tile{
   struct element tile;
   short id;
   bool isobstacle;
+  float layer;
 };
 
 struct gamemap{
@@ -23,6 +24,8 @@ struct gamemap{
   struct tile effect[MAP_HEIGHT][MAP_WIDTH];
   struct tile mobs[MAP_HEIGHT][MAP_WIDTH];
   int pcx, pcy; /*Player coordinate x and y*/
+  int border; /*Border*/
+  int genoffset;
 };
 
 struct tilemap{
@@ -42,6 +45,6 @@ void updatetilemap(struct tilemap* map);
 
 void rendertilemap(struct tilemap* map, GLuint shaderprogram, float screenaspect);
 
-void move_mob_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T);
+void move_player_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T);
 
 #endif/*ENGINECORE_TIELS_MAP_H*/

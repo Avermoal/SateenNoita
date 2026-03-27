@@ -1,16 +1,72 @@
 #include "EngineCore/map_generator.h"
 
-#include "EngineCore/tiles_info.h"
+#include "Mathematics/noises.h"
 
-#include "Mathematics/perlin_noise.h"
+#define OAK_BOUND 0.09f
+#define BOUND 0.0f
+#define FIR_BOUND -0.09f
+#define MOBS_PLACE_BOUND_TOP 0.14f
+#define MOBS_PLACE_BOUND_BOTTOM 0.12f
 
-void mapgen(int maph, int mapw, struct tile (*map)[mapw], int seed, int lbc, int rbc)
+//@TODO Написать функцию устанавливающую препятсвия(любые)
+static void setobstacles(int maph, int mapw, struct tile (*map)[mapw])
 {
 
-  for(int y = 0; y < maph; ++y){
-    for(int x = 0; x < mapw; ++x){
-      map[y][x].id = ID_000001_GROUND;
-      map[y][x].isobstacle = false;
-    }
+}
+
+void init_map_generator(int seed)
+{
+  init_perlin_noise(seed);
+}
+
+void mapgen(int maph, int mapw, struct tile (*map)[mapw], int lbc, enum META_TILE_TYPE tt)
+{
+  /*Perlin noise map generation*/
+  float hieghtmap[maph][mapw];
+  perlin_noise_map_gen(maph, mapw, hieghtmap, lbc);
+  switch(tt){
+    case GROUND_TILE:
+      /*Map generation*/
+      for(int y = 0; y < maph; ++y){
+        for(int x = 0; x < mapw; ++x){
+          map[y][x].id = ID_000001_GROUND;
+          map[y][x].isobstacle = false;
+        }
+      }
+      for(int y = 0; y < maph; ++y){
+        for(int x = 0; x < mapw; ++x){
+          if(hieghtmap[y][x] < OAK_BOUND && hieghtmap[y][x] > BOUND){
+            map[y][x].id = ID_000008_TREE_OAK;
+            map[y][x].isobstacle = true;
+          }
+          if(hieghtmap[y][x] > FIR_BOUND && hieghtmap[y][x] < BOUND){
+            map[y][x].id = ID_000009_TREE_FIR;
+            map[y][x].isobstacle = true;
+          }
+          if(hieghtmap[y][x] == 0.0f){
+            map[y][x].id = ID_000002_GRASS;
+            map[y][x].isobstacle = false;
+          }
+        }
+      }
+      break;
+    case MOBS_TILE:
+      for(int y = 0; y < maph; ++y){
+        for(int x = 0; x < mapw; ++x){
+          map[y][x].id = ID_000000_VOID;
+          map[y][x].isobstacle = false;
+        }
+      }
+      /*Set mobs*/
+      for(int y = 0; y < maph; ++y){
+        for(int x = 0; x < mapw; ++x){
+          if(hieghtmap[y][x] < MOBS_PLACE_BOUND_TOP && hieghtmap[y][x] > MOBS_PLACE_BOUND_BOTTOM){
+            map[y][x].id = ID_000012_GOLEM;
+            map[y][x].isobstacle = true;
+          }
+        }
+      }
+      break;
+    default: return;
   }
 }
