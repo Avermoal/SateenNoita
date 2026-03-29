@@ -15,6 +15,7 @@ struct windowdata{
   double curtime;
   double last_move_time;
   bool window_should_not_close;
+  bool isfullscreen;
 };
 
 struct window{

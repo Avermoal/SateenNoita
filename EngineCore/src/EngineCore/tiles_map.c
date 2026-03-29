@@ -6,20 +6,16 @@
 #include <GLFW/glfw3.h>
 
 #include "EngineCore/debug_log.h"
+#include "EngineCore/game_window_info.h"
 #include "EngineCore/map_generator.h"
 
 #include "Mathematics/ortho_projection.h"
 
-#define MAP_WIDTH_ASPECT 0.5f
-#define MAP_HEIGHT_ASPECT 1
-#define VERTICES_COUNT 4
-#define INDICES_COUNT 6
-#define TEX_SHIFT 1.0f
 #define GROUND_LAYER 0.0f
 #define MOBS_LAYER 1.0f
 #define EFFECT_LAYER 2.0f
 
-#define PATH_TO_TEXTURES "res/textures"
+#define PATH_TO_TEXTURES "res/textures/game_textures"
 
 #define MAP_START 0
 #define PLAYER_START_COORDX 9
@@ -154,20 +150,12 @@ static void set_mobs(struct gamemap* gmap, int lbc, bool is_new_line)
   }
 }
 
-void createtilemap(struct tilemap* map, struct GLFWwindow* win)
+void createtilemap(struct tilemap* map)
 {
-  /*Set map coords*/
-  int windowwidth = 0, windowheight = 0;
-  glfwGetFramebufferSize(win, &windowwidth, &windowheight);
-  map->xcoord = (int)(MAP_WIDTH_ASPECT * MAP_WIDTH_ASPECT * windowwidth);
-  map->ycoord = 0;
-  /*Set map width and height*/
-  map->width = (int)(MAP_WIDTH_ASPECT * windowwidth);
-  map->height = MAP_HEIGHT_ASPECT * windowheight;
   /*Load texture array*/
   #ifndef NDEBUG
   if(TILES_TYPE_NUMBER == get_textures_number(PATH_TO_TEXTURES)){
-    load_texture_array(&map->texarr, TILE_SIZE, TILES_TYPE_NUMBER, PATH_TO_TEXTURES);
+    load_texture_array(&map->texarr, TILE_SIZE, TILE_SIZE, TILES_TYPE_NUMBER, PATH_TO_TEXTURES);
     if(!map->texarr.id){
       LOG_CRITICAL("Failed to load texture array\n");
     }
@@ -175,7 +163,7 @@ void createtilemap(struct tilemap* map, struct GLFWwindow* win)
     LOG_CRITICAL("TILES_TYPE_NUMBER != get_textures_number()\n");
   }
   #else
-  load_texture_array(&map->texarr, TILE_SIZE, TILES_TYPE_NUMBER, PATH_TO_TEXTURES);
+  load_texture_array(&map->texarr, TILE_SIZE, TILE_SIZE, TILES_TYPE_NUMBER, PATH_TO_TEXTURES);
   #endif
   /*Create vertices and indices for all tiles*/
   struct vertex vertices[VERTICES_COUNT];
@@ -437,7 +425,7 @@ static void destroy_last_map_line(struct tilemap* map)
 
 void updatetilemap(struct tilemap* map)
 {
-  if(map->gmap.pcy > map->gmap.border){
+  if(map->gmap.pcy >= map->gmap.border){
     destroy_last_map_line(map);
     for(int y = 0; y < MAP_HEIGHT - 1; ++y){
       for(int x = 0; x < MAP_WIDTH; ++x){
@@ -449,7 +437,7 @@ void updatetilemap(struct tilemap* map)
     }
     add_first_map_line(map);
     --(map->gmap.pcy);
-    move_player_on_place(&map->gmap, MT_DT);
+    //move_player_on_place(&map->gmap, MT_DT);
   }
 }
 

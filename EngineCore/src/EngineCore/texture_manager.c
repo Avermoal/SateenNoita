@@ -73,7 +73,7 @@ void deletetexture(struct texture* tex)
   tex->height = 0;
 }
 
-void load_texture_array(struct texturearray* texarr, GLint size_in_pixels, GLuint layers, const char* path_to_dir)
+void load_texture_array(struct texturearray* texarr, GLint height_in_pixels, GLint width_in_pixels, GLuint layers, const char* path_to_dir)
 {
   GLuint texarr_id = 0;
   /*Flip stbi loading image configure*/
@@ -82,7 +82,7 @@ void load_texture_array(struct texturearray* texarr, GLint size_in_pixels, GLuin
   glGenTextures(1, &texarr_id);
   glBindTexture(GL_TEXTURE_2D_ARRAY, texarr_id);
   /*Memory allocation*/
-  glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, size_in_pixels, size_in_pixels, layers);
+  glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width_in_pixels, height_in_pixels, layers);
   /*Load textures in order*/
   char* texture_files[layers];
   get_textures_names(layers, texture_files, path_to_dir);
@@ -96,11 +96,11 @@ void load_texture_array(struct texturearray* texarr, GLint size_in_pixels, GLuin
       LOG_CRITICAL("Failed to load texture: %s\n", full_path);
       continue;
     }
-    if(width != size_in_pixels || height != size_in_pixels){
+    if(width != width_in_pixels || height != height_in_pixels){
       LOG_CRITICAL("Texture %s has wrong size: %dx%d, expected %dx%d\n", 
-                   texture_files[i], width, height, size_in_pixels, size_in_pixels);
+                   texture_files[i], width, height, width_in_pixels, height_in_pixels);
     }
-    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, size_in_pixels, size_in_pixels, 1, GL_RGBA, GL_UNSIGNED_BYTE, img);
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width_in_pixels, height_in_pixels, 1, GL_RGBA, GL_UNSIGNED_BYTE, img);
     stbi_image_free(img);
   }
   /*Free memory section*/
@@ -109,7 +109,8 @@ void load_texture_array(struct texturearray* texarr, GLint size_in_pixels, GLuin
   }
   /*Set texture array data*/
   texarr->id = texarr_id;
-  texarr->size_in_pixels = size_in_pixels;
+  texarr->width_in_pixels = width_in_pixels;
+  texarr->height_in_pixels = height_in_pixels;
   texarr->layers = layers;
   /*Texture array settings*/
   glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -119,7 +120,6 @@ void load_texture_array(struct texturearray* texarr, GLint size_in_pixels, GLuin
   /*Unbind texture array*/
   glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
-
 
 void bind_texture_array(struct texturearray texarr)
 {
@@ -134,7 +134,7 @@ void unbind_texture_array(void)
 void delete_texture_array(struct texturearray* texarr)
 {
   glDeleteTextures(1, &texarr->id);
-  texarr->size_in_pixels = 0;
+  texarr->height_in_pixels = texarr->width_in_pixels = 0;
   texarr->layers = 0;
 }
 

@@ -35,6 +35,8 @@ set(ENGINE_PRIVATE_INCLUDES
   includes/EngineCore/map_generator.h
   includes/EngineCore/player_move_system.h
   includes/EngineCore/mobs_move_system.h
+  includes/EngineCore/game_window_info.h
+  includes/EngineCore/system_actions.h
 
   ${MATH_PRIVATE_INCLUDES}
 )
@@ -52,6 +54,7 @@ set(ENGINE_PRIVATE_SOURCES
   src/EngineCore/map_generator.c
   src/EngineCore/player_move_system.c
   src/EngineCore/mobs_move_system.c
+  src/EngineCore/system_actions.c
 
   ${MATH_PRIVATE_SOURCES}
 )

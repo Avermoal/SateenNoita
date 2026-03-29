@@ -3,8 +3,10 @@
 #include "Mathematics/noises.h"
 
 #define OAK_BOUND 0.09f
-#define BOUND 0.0f
+#define TREE_BOUND 0.0f
 #define FIR_BOUND -0.09f
+#define GRASS_BOUND_TOP -0.32f
+#define GRASS_BOUND_BOTTOM -0.7f
 #define MOBS_PLACE_BOUND_TOP 0.14f
 #define MOBS_PLACE_BOUND_BOTTOM 0.12f
 
@@ -35,15 +37,15 @@ void mapgen(int maph, int mapw, struct tile (*map)[mapw], int lbc, enum META_TIL
       }
       for(int y = 0; y < maph; ++y){
         for(int x = 0; x < mapw; ++x){
-          if(hieghtmap[y][x] < OAK_BOUND && hieghtmap[y][x] > BOUND){
+          if(hieghtmap[y][x] < OAK_BOUND && hieghtmap[y][x] > TREE_BOUND){
             map[y][x].id = ID_000008_TREE_OAK;
             map[y][x].isobstacle = true;
           }
-          if(hieghtmap[y][x] > FIR_BOUND && hieghtmap[y][x] < BOUND){
+          if(hieghtmap[y][x] > FIR_BOUND && hieghtmap[y][x] < TREE_BOUND){
             map[y][x].id = ID_000009_TREE_FIR;
             map[y][x].isobstacle = true;
           }
-          if(hieghtmap[y][x] == 0.0f){
+          if(hieghtmap[y][x] > GRASS_BOUND_BOTTOM && hieghtmap[y][x] < GRASS_BOUND_TOP){
             map[y][x].id = ID_000002_GRASS;
             map[y][x].isobstacle = false;
           }
@@ -58,11 +60,13 @@ void mapgen(int maph, int mapw, struct tile (*map)[mapw], int lbc, enum META_TIL
         }
       }
       /*Set mobs*/
-      for(int y = 0; y < maph; ++y){
-        for(int x = 0; x < mapw; ++x){
-          if(hieghtmap[y][x] < MOBS_PLACE_BOUND_TOP && hieghtmap[y][x] > MOBS_PLACE_BOUND_BOTTOM){
-            map[y][x].id = ID_000012_GOLEM;
-            map[y][x].isobstacle = true;
+      if(lbc > MAP_HEIGHT){
+        for(int y = 0; y < maph; ++y){
+          for(int x = 0; x < mapw; ++x){
+            if(hieghtmap[y][x] < MOBS_PLACE_BOUND_TOP && hieghtmap[y][x] > MOBS_PLACE_BOUND_BOTTOM){
+              map[y][x].id = ID_000012_GOLEM;
+              map[y][x].isobstacle = true;
+            }
           }
         }
       }

@@ -13,6 +13,7 @@
 #include "EngineCore/scene.h"
 #include "EngineCore/player_move_system.h"
 #include "EngineCore/mobs_move_system.h"
+#include "EngineCore/system_actions.h"
 
 void initwindow(struct window* pwindow, const char* title, int width, int height)
 {
@@ -28,6 +29,8 @@ void initwindow(struct window* pwindow, const char* title, int width, int height
   glfwWindowHint(GLFW_DEPTH_BITS, 24);
   glfwWindowHint(GLFW_STENCIL_BITS, 8);
   glfwWindowHint(GLFW_SAMPLES, 4); /*MSAA 4x*/
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
   /*GLFW init*/
   if(!glfwInit()){
     LOG_CRITICAL("Failed init GLFW.\n");
@@ -52,12 +55,19 @@ void initwindow(struct window* pwindow, const char* title, int width, int height
     termwindow(pwindow);
     return;
   }
+  /*WINDOWED -> FULLSCREEN*/
+  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+  glfwSetWindowMonitor(pwindow->pwin, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+  glfwSetWindowAttrib(pwindow->pwin, GLFW_RESIZABLE, GLFW_FALSE);
+  glfwSetWindowAttrib(pwindow->pwin, GLFW_DECORATED, GLFW_FALSE);
   /*Window set data*/
-  pwindow->windata.width = width;
-  pwindow->windata.height = height;
+  pwindow->windata.width = mode->width;
+  pwindow->windata.height = mode->height;
   pwindow->windata.title = title;
   pwindow->windata.window_should_not_close = true;
   pwindow->windata.last_move_time = 0.0;
+  pwindow->windata.isfullscreen = true;
   /*Set OpenGL window user pointer*/
   glfwSetWindowUserPointer(pwindow->pwin, &pwindow->windata);
   /*Shader program load*/
@@ -121,6 +131,7 @@ void onupdate(struct window* pwindow)
   if(player_move_handler(pwindow)){
     mobs_move_handler(pwindow);
   }
+  systemactions(pwindow);
   /*Game scene update*/
   updatescene(pwindow->scn);
   /*Poll for process events*/

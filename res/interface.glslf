@@ -1,13 +1,10 @@
 #version 460 core
-
-in vec3 FragPos;
 in vec2 TexCoord;
+flat in int TexLayer;
 
+uniform sampler2DArray interfaceTextureArray;
 out vec4 FragColor;
 
-uniform sampler2D uTexture;
-
-void main(void)
-{
-    FragColor = texture(uTexture, TexCoord);
+void main() {
+    FragColor = texture(interfaceTextureArray, vec3(TexCoord, TexLayer));
 }

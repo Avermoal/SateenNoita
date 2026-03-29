@@ -30,14 +30,10 @@ struct gamemap{
 
 struct tilemap{
   struct texturearray texarr;
-  int xcoord;/*Use pixels coordinate on the window*/
-  int ycoord;
-  int width;
-  int height;
   struct gamemap gmap;
 };
 
-void createtilemap(struct tilemap* map, struct GLFWwindow* win);
+void createtilemap(struct tilemap* map);
 
 void destroytilemap(struct tilemap* map);/*Need to destroy elements in tiles*/
 

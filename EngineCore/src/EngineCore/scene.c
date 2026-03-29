@@ -8,13 +8,15 @@
 
 void initscene(struct scene* scn, struct window* win)
 {
-  createtilemap(&scn->map, win->pwin);
+  create_game_interface(&scn->gint);
+  createtilemap(&scn->map);
 }
 
 void destroyscene(struct scene** scn)
 {
   if(scn && *scn){
     destroytilemap(&((*scn)->map));
+    destroy_game_interface(&((*scn)->gint));
     free(*scn);
     *scn = nullptr;
   }
@@ -22,7 +24,9 @@ void destroyscene(struct scene** scn)
 
 void renderscene(struct window* win)
 {
-  /*Render tilemap*/
+  /*RENDER MENU*/
+
+  /*RENDER TILEMAP*/
   bind_shader_program(win->shp.gameprog);
   glActiveTexture(GL_TEXTURE0);
   bind_texture_array(win->scn->map.texarr);
@@ -37,14 +41,14 @@ void renderscene(struct window* win)
   /*Check uniform var*/
   GLint textureloc = glGetUniformLocation(win->shp.gameprog, "tileTextureArray");
   #ifndef NDEBUG/*Check uniform var*/
-  if(textureloc == -1) {
+  if(textureloc == -1){
     LOG_CRITICAL("Uniform 'tileTextureArray' not found in shader program!\n");
     /*Input all uniform var in shader*/
     GLint uniformcount = 0;
     glGetProgramiv(win->shp.gameprog, GL_ACTIVE_UNIFORMS, &uniformcount);
     LOG_CRITICAL("Total active uniforms in shader: %d\n", uniformcount);
     char uniformname[256];
-    for(GLint i = 0; i < uniformcount; i++) {
+    for(GLint i = 0; i < uniformcount; i++){
       GLsizei length;
       GLint size;
       GLenum type;
@@ -57,9 +61,36 @@ void renderscene(struct window* win)
   rendertilemap(&win->scn->map, win->shp.gameprog, (float)(win->windata.width)/(float)(win->windata.height));
   unbind_texture_array();
   unbind_shader_program();
+  /*RENDER GAME INTERFACE*/
+  bind_shader_program(win->shp.interfaceprog);
+  glActiveTexture(GL_TEXTURE0);
+  bind_texture_array(win->scn->gint.texarray);
+  textureloc = glGetUniformLocation(win->shp.interfaceprog, "interfaceTextureArray");
+  #ifndef NDEBUG/*Check uniform var*/
+  if(textureloc == -1){
+    LOG_CRITICAL("Uniform 'interfaceTextureArray' not found in shader program!");
+    /*Input all uniform var in shader*/
+    GLint uniformcount = 0;
+    glGetProgramiv(win->shp.interfaceprog, GL_ACTIVE_UNIFORMS, &uniformcount);
+    LOG_CRITICAL("Total active uniforms in shader: %d\n", uniformcount);
+    char uniformname[256];
+    for(GLint i = 0; i < uniformcount; ++i){
+      GLsizei length;
+      GLint size;
+      GLenum type;
+      glGetActiveUniform(win->shp.interfaceprog, i, sizeof(uniformname), &length, &size, &type, uniformname);
+      LOG_CRITICAL("Uniform %d: %s (type: %d, size: %d)\n", i, uniformname, type, size);
+    }
+  }
+  #endif/*Check uniform var*/
+  glUniform1i(textureloc, 0);
+  render_game_interface(&win->scn->gint, win->shp.interfaceprog, (float)(win->windata.width)/(float)(win->windata.height));
+  unbind_texture_array();
+  unbind_shader_program();
 }
 
 void updatescene(struct scene* scn)
 {
   updatetilemap(&scn->map);
+  update_game_interface(&scn->gint);
 }
