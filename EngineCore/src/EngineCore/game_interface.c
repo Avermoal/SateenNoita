@@ -3,8 +3,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "EngineCore/tiles_info.h"
 #include "EngineCore/game_window_info.h"
+#include "EngineCore/text_display_system.h"
 
 #include "Mathematics/ortho_projection.h"
 
@@ -17,12 +17,16 @@
 #define INTERFACE_TEXTURE_LAYER_LEFT 0
 #define INTERFACE_TEXTURE_LAYER_RIGHT 1
 
-static struct element create_text();
+#define STATS_LIST_COORDY (INTERFACE_HEIGHT - 16)
+#define STATS_LIST_COORDX 0.0f
+#define STATS_LIST_HEIGHT (16.0f + 16.0f)
+#define STATS_LIST_WIDTH 32.0f
+#define TEXT_SCALE 0.5f
 
 static struct element create_element_part_interface(float y, float x, float height, float width, int texlayer);
 static void resize_interface_part(struct element* elem, float y, float x, float height, float width, int texlayer);
-static struct element create_spell_list();
-static struct element create_stats_list();
+static struct container create_spell_list();
+static struct container create_stats_list(float rely, float relx, float height, float width);
 static struct element createinventory();
 static struct element create_spell_craft_menu();
 
@@ -39,8 +43,8 @@ void create_game_interface(struct gameinterface* gint)
   gint->left.part = create_element_part_interface(gint->left.ycoord, gint->left.xcoord, INTERFACE_HEIGHT, INTERFACE_WIDTH, INTERFACE_TEXTURE_LAYER_LEFT);
   gint->right.part = create_element_part_interface(gint->right.ycoord, gint->right.xcoord, INTERFACE_HEIGHT, INTERFACE_WIDTH, INTERFACE_TEXTURE_LAYER_RIGHT);
   /*Other interface element*/
-  gint->spelllist.part = create_spell_list();
-  gint->statslist.part = create_stats_list();
+  gint->spelllist = create_spell_list();
+  gint->statslist = create_stats_list(STATS_LIST_COORDY, STATS_LIST_COORDX, STATS_LIST_HEIGHT, STATS_LIST_WIDTH);
   gint->inventory.part = createinventory();
   gint->spell_craft_menu.part = create_spell_craft_menu();
 }
@@ -53,11 +57,11 @@ void destroy_game_interface(struct gameinterface* gint)
   if(gint->right.part.vao != 0){
     destroyelement(&gint->right.part);
   }
-  if(gint->spelllist.part.vao != 0){
+  if(gint->spelllist.txt){
     //destroyelement(&gint->spelllist.part);
   }
-  if(gint->statslist.part.vao != 0){
-    //destroyelement(&gint->statslist.part);
+  if(gint->statslist.txt){
+    destroytext(gint->statslist.txt);
   }
   if(gint->inventory.part.vao != 0){
     //destroyelement(&gint->inventory.part);
@@ -73,9 +77,8 @@ void update_game_interface(struct gameinterface* gint)
 
 }
 
-void render_game_interface(struct gameinterface* gint, GLuint shaderprogram, float screenaspect)
+void render_game_interface(struct gameinterface* gint, float screenaspect)
 {
-  float projection[16];
   float mapwidth = INTERFACE_WIDTH * 2;
   float mapheight = INTERFACE_HEIGHT;
   float mapaspect = mapwidth / mapheight;
@@ -96,11 +99,8 @@ void render_game_interface(struct gameinterface* gint, GLuint shaderprogram, flo
     bottom = (mapheight - visibleheight) / 2.0f;
     top = mapheight - bottom;
   }
-  create_ortho_projection(projection, left, right, bottom, top);
-  GLint projectionloc = glGetUniformLocation(shaderprogram, "projview");
-  if(projectionloc != -1){
-    glUniformMatrix4fv(projectionloc, 1, GL_FALSE, projection);
-  }
+  /*Update containers coordinates*/
+  gint->statslist.xcoord = left + 5.0f;
   /*RESIZE INTERFACE TO WINDOW SIDES*/
   float left_width = -left;
   float right_width = right - mapwidth;
@@ -126,12 +126,6 @@ void render_game_interface(struct gameinterface* gint, GLuint shaderprogram, flo
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     displayelement(gint->right.part);
   }
-}
-
-static struct element create_text()
-{
-  struct element textfield;
-  return textfield;
 }
 
 static struct element create_element_part_interface(float y, float x, float height, float width, int texlayer)
@@ -187,15 +181,24 @@ static void resize_interface_part(struct element* elem, float y, float x, float 
   *elem = createelement(vertices, VERTICES_COUNT, indices, INDICES_COUNT, true, GL_DYNAMIC_DRAW);
 }
 
-static struct element create_spell_list()
+static struct container create_spell_list()
 {
-  struct element spelllist;
+  struct container spelllist;
   return spelllist;
 }
 
-static struct element create_stats_list()
+#define STATSLIST_TEXT_REL_COORDX 0.0f
+#define STATSLIST_TEXT_REL_COORDY 0.0f
+
+static struct container create_stats_list(float rely, float relx, float height, float width)
 {
-  struct element statslist;
+  struct container statslist;
+  statslist.ycoord = rely;
+  statslist.xcoord = relx;
+  statslist.height = height;
+  statslist.width = width;
+  statslist.txt = createtext("HP: 100", STATSLIST_TEXT_REL_COORDX, STATSLIST_TEXT_REL_COORDY, TEXT_SCALE);
+
   return statslist;
 }
 

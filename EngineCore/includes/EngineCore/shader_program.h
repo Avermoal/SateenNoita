@@ -7,6 +7,7 @@ struct shaderprogram{
   unsigned int interfaceprog;
   unsigned int gameprog;
   unsigned int menuprog;
+  unsigned int textprog;
 };
 
 enum SHADER_PROGRAM_EXIT_CODE{

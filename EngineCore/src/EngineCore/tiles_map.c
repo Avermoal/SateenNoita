@@ -8,6 +8,7 @@
 #include "EngineCore/debug_log.h"
 #include "EngineCore/game_window_info.h"
 #include "EngineCore/map_generator.h"
+#include "EngineCore/stats_system.h"
 
 #include "Mathematics/ortho_projection.h"
 
@@ -22,7 +23,13 @@
 #define PLAYER_START_COORDY 3
 #define PLAYER_BORDER_COORD (int)(MAP_HEIGHT / 2)
 
-#define SEED 1234567
+#define ANIMATION_AMPLITUDE 0.005f
+#define ANIMATION_SPEED 3.0f
+
+#define MOBS_START_HP_MP 10
+#define PLAYER_START_HP_MP 100
+
+#define SEED 323908
 
 static void set_mobs(struct gamemap* gmap, int lbc, bool is_new_line)
 {
@@ -39,6 +46,7 @@ static void set_mobs(struct gamemap* gmap, int lbc, bool is_new_line)
         gmap->mobs[MAP_HEIGHT - 1][x].tile.vao = 0;
         gmap->mobs[MAP_HEIGHT - 1][x].id = ID_000000_VOID;
         gmap->mobs[MAP_HEIGHT - 1][x].isobstacle = false;
+        gmap->mobs[MAP_HEIGHT - 1][x].stts = NULL;
         continue;
       }
       /*Calculate tile coordinates in pixels*/
@@ -50,6 +58,11 @@ static void set_mobs(struct gamemap* gmap, int lbc, bool is_new_line)
       gmap->mobs[MAP_HEIGHT - 1][x].ycoord = ypos;
       gmap->mobs[MAP_HEIGHT - 1][x].isobstacle = tiletype[0][x].isobstacle;
       gmap->mobs[MAP_HEIGHT - 1][x].layer = MOBS_LAYER;
+      gmap->mobs[MAP_HEIGHT - 1][x].stts = malloc(sizeof(struct stats));
+      gmap->mobs[MAP_HEIGHT - 1][x].stts->HP = MOBS_START_HP_MP;
+      gmap->mobs[MAP_HEIGHT - 1][x].stts->MP = MOBS_START_HP_MP;
+      gmap->mobs[MAP_HEIGHT - 1][x].stts->isalive = true;
+
       /*Set texture coordinates*/
       const float xtex = 0.0f;
       const float ytex = 0.0f;
@@ -97,6 +110,7 @@ static void set_mobs(struct gamemap* gmap, int lbc, bool is_new_line)
         /*VOID CHECK*/
         if(tiletype[y][x].id == ID_000000_VOID){
           gmap->mobs[y][x].tile.vao = 0;
+          gmap->mobs[y][x].stts = NULL;
           continue;
         }
         /*Calculate tile coordinates in pixels*/
@@ -108,6 +122,10 @@ static void set_mobs(struct gamemap* gmap, int lbc, bool is_new_line)
         gmap->mobs[y][x].ycoord = ypos;
         gmap->mobs[y][x].isobstacle = tiletype[y][x].isobstacle;
         gmap->mobs[y][x].layer = MOBS_LAYER;
+        gmap->mobs[MAP_HEIGHT - 1][x].stts = malloc(sizeof(struct stats));
+        gmap->mobs[MAP_HEIGHT - 1][x].stts->HP = MOBS_START_HP_MP;
+        gmap->mobs[MAP_HEIGHT - 1][x].stts->MP = MOBS_START_HP_MP;
+        gmap->mobs[MAP_HEIGHT - 1][x].stts->isalive = true;
         /*Set texture coordinates*/
         const float xtex = 0.0f;
         const float ytex = 0.0f;
@@ -186,6 +204,7 @@ void createtilemap(struct tilemap* map)
       map->gmap.groundmap[y][x].ycoord = ypos;
       map->gmap.groundmap[y][x].isobstacle = tiletype[y][x].isobstacle;
       map->gmap.groundmap[y][x].layer = GROUND_LAYER;
+      map->gmap.groundmap[y][x].stts = NULL;
       /*Set texture coordinates*/
       const float xtex = 0.0f;
       const float ytex = 0.0f;
@@ -266,6 +285,10 @@ void createtilemap(struct tilemap* map)
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].ycoord = ypos;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].id = ID_000010_PLAYER;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].layer = MOBS_LAYER;
+  map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].stts = malloc(sizeof(struct stats));
+  map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].stts->HP = PLAYER_START_HP_MP;
+  map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].stts->MP = PLAYER_START_HP_MP;
+  map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].stts->isalive = true;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].tile = createelement(vertices, VERTICES_COUNT, 
                                                                           indices, INDICES_COUNT, 
                                                                           true, GL_STATIC_DRAW);
@@ -279,6 +302,8 @@ void destroytilemap(struct tilemap* map)
       destroyelement(&map->gmap.groundmap[y][x].tile);
       if(map->gmap.mobs[y][x].tile.vao != 0){
         destroyelement(&map->gmap.mobs[y][x].tile);
+        free(map->gmap.mobs[y][x].stts);
+        map->gmap.mobs[y][x].stts = NULL;
       }
       if(map->gmap.effect[y][x].tile.vao != 0){
         destroyelement(&map->gmap.effect[y][x].tile);
@@ -437,39 +462,30 @@ void updatetilemap(struct tilemap* map)
     }
     add_first_map_line(map);
     --(map->gmap.pcy);
-    //move_player_on_place(&map->gmap, MT_DT);
   }
 }
 
 void rendertilemap(struct tilemap* map, GLuint shaderprogram, float screenaspect)
 {
-  /*Calculate orthographic projection matrix*/
-  float projection[16];
-  float mapwidth = MAP_WIDTH * TILE_SIZE;
-  float mapheight = MAP_HEIGHT * TILE_SIZE;
-  float mapaspect = mapwidth / mapheight;
-  float left = 0, right = 0, bottom = 0, top = 0;
-  float visiblewidth = 0, visibleheight = 0;
-  if(screenaspect > mapaspect){
-    visibleheight = mapheight;
-    visiblewidth = mapheight * screenaspect;
-  }else{
-    visiblewidth = mapwidth;
-    visibleheight = mapwidth / screenaspect;
+  /*Send uniform to shader for animation*/
+  GLint timeloc = glGetUniformLocation(shaderprogram, "u_time");
+  if(timeloc != -1){
+    glUniform1f(timeloc, (float)glfwGetTime());
   }
-
-  left = (mapwidth - visiblewidth) / 2.0f;
-  right = mapwidth - left;
-  bottom = (mapheight - visibleheight) / 2.0f;
-  top = mapheight - bottom;
-  create_ortho_projection(projection, left, right, bottom, top);
-  /*Send orthographic projection matrix to shader*/
-  GLuint projectionloc = glGetUniformLocation(shaderprogram, "projview");
-  glUniformMatrix4fv(projectionloc, 1, GL_FALSE, projection); 
+  GLint amploc = glGetUniformLocation(shaderprogram, "u_amplitude");
+  if(amploc != -1){
+    glUniform1f(amploc, ANIMATION_AMPLITUDE);
+  }
+  GLint speedloc = glGetUniformLocation(shaderprogram, "u_speed");
+  if(speedloc != -1){
+    glUniform1f(speedloc, ANIMATION_SPEED);
+  }
   /*Render all tiles*/
   for(int y = 0; y < MAP_HEIGHT; ++y){
     for(int x = 0; x < MAP_WIDTH; ++x){
-      displayelement(map->gmap.groundmap[y][x].tile);
+      if(map->gmap.groundmap[y][x].tile.vao != 0){
+        displayelement(map->gmap.groundmap[y][x].tile);
+      }
       if(map->gmap.mobs[y][x].tile.vao != 0){
         displayelement(map->gmap.mobs[y][x].tile);
       }
@@ -487,6 +503,7 @@ void move_player_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T)
     if(!gmap->groundmap[gmap->pcy + MOVE][gmap->pcx].isobstacle && !gmap->mobs[gmap->pcy + MOVE][gmap->pcx].isobstacle){
       if(nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy + MOVE, gmap->pcx)){
         gmap->pcy += MOVE;
+        addMP(&gmap->mobs[gmap->pcy][gmap->pcx], 1);
       }
     }
   }
@@ -494,6 +511,7 @@ void move_player_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T)
     if(!gmap->groundmap[gmap->pcy][gmap->pcx + MOVE].isobstacle && !gmap->mobs[gmap->pcy][gmap->pcx + MOVE].isobstacle){
       if(nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy, gmap->pcx + MOVE)){
         gmap->pcx += MOVE;
+        addMP(&gmap->mobs[gmap->pcy][gmap->pcx], 1);
       }
     }
   }
@@ -501,13 +519,16 @@ void move_player_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T)
     if(!gmap->groundmap[gmap->pcy - MOVE][gmap->pcx].isobstacle && !gmap->mobs[gmap->pcy - MOVE][gmap->pcx].isobstacle){
       if(nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy - MOVE, gmap->pcx)){
         gmap->pcy -= MOVE;
+        addMP(&gmap->mobs[gmap->pcy][gmap->pcx], 1);
       }
+
     }
   }
   if(MT_T == MT_LT){
     if(!gmap->groundmap[gmap->pcy][gmap->pcx - MOVE].isobstacle && !gmap->mobs[gmap->pcy][gmap->pcx - MOVE].isobstacle){
       if(nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy, gmap->pcx - MOVE)){
         gmap->pcx -= MOVE;
+        addMP(&gmap->mobs[gmap->pcy][gmap->pcx], 1);
       }
     }
   }

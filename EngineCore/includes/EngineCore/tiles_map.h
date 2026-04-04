@@ -4,11 +4,11 @@
 #include "EngineCore/display_manager.h"
 #include "EngineCore/texture_manager.h"
 #include "EngineCore/tiles_info.h"
-
-#define MAP_WIDTH 19
-#define MAP_HEIGHT 23
+#include "EngineCore/game_window_info.h"
 
 struct GLFWwindow;
+
+struct stats;
 
 struct tile{
   float xcoord;/*OpenGL use float for displaying elements on screen*/
@@ -17,6 +17,7 @@ struct tile{
   short id;
   bool isobstacle;
   float layer;
+  struct stats* stts;
 };
 
 struct gamemap{

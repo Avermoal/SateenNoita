@@ -5,6 +5,7 @@ flat in int TexLayer;
 uniform sampler2DArray tileTextureArray;
 out vec4 FragColor;
 
-void main() {
+void main(void)
+{
     FragColor = texture(tileTextureArray, vec3(TexCoord, TexLayer));
 }

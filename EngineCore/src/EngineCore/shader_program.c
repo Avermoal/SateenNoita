@@ -13,6 +13,7 @@ enum SHADER_PROGRAM_EXIT_CODE load_shader_programs(struct shaderprogram* shp)
   shp->interfaceprog = 0;
   shp->gameprog = 0;
   shp->menuprog = 0;
+  shp->textprog = 0;
   /*Interface shader program*/
   const char* interface_vertsh_source = "res/interface.glslv";
   const char* interface_fragsh_source = "res/interface.glslf";
@@ -50,6 +51,25 @@ enum SHADER_PROGRAM_EXIT_CODE load_shader_programs(struct shaderprogram* shp)
   free(game_vertsh_code);
   free(game_fragsh_code);
   /*Menu shader program*/
+
+  /*Text shader program*/
+  const char* text_vertsh_source = "res/text.glslv";
+  const char* text_fragsh_source = "res/text.glslf";
+  size_t text_vertsh_length = shlength(text_vertsh_source);
+  size_t text_fragsh_length = shlength(text_fragsh_source);
+  char* text_vertsh_code = (char*)calloc(text_vertsh_length + 1, sizeof(char));
+  char* text_fragsh_code = (char*)calloc(text_fragsh_length + 1, sizeof(char));
+  if(!readshader(text_vertsh_source, text_vertsh_code, text_vertsh_length)){
+    LOG_CRITICAL("[SHADER]: Text vertex shader don't load\n");
+    return SHADER_PROGRAM_EXIT_FAILURE;
+  }
+  if(!readshader(text_fragsh_source, text_fragsh_code, text_fragsh_length)){
+    LOG_CRITICAL("[SHADER]: Text fragment shder don't load\n");
+    return SHADER_PROGRAM_EXIT_FAILURE;
+  }
+  shp->textprog = create_shader_program(text_vertsh_code, text_fragsh_code);
+  free(text_vertsh_code);
+  free(text_fragsh_code);
 
   return SHADER_PROGRAM_EXIT_SUCCESS;
 }

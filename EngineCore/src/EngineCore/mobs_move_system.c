@@ -4,6 +4,7 @@
 #include "EngineCore/tiles_info.h"
 #include "EngineCore/tiles_map.h"
 #include "EngineCore/scene.h"
+#include "EngineCore/stats_system.h"
 
 #include "Mathematics/a_star.h"
 
@@ -22,7 +23,8 @@ void mobs_move_handler(struct window* pwindow)
       }
       if(astar(gmap, y, x, pcy, pcx, &nexty, &nextx)){
         if(nextx == pcx && nexty == pcy){
-          /*PLACE FOR ATTACK*/
+          /*PLACE MOBS FOR ATTACK*/
+          addHP(&gmap->mobs[pcy][pcx], -5);
           continue;
         }
         nearest_swap_tile(gmap->mobs, y, x, nexty, nextx);

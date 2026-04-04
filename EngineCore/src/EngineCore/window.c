@@ -90,6 +90,8 @@ void initwindow(struct window* pwindow, const char* title, int width, int height
   /*Enable tests*/
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
   /*INFO*/
   LOG_INFO("OpenGL %s\n", glGetString(GL_VERSION));
   LOG_INFO("Renderer: %s\n", glGetString(GL_RENDERER));
@@ -103,13 +105,6 @@ void termwindow(struct window* pwindow)
   destroy_shader_programs(pwindow->shp);
   glfwDestroyWindow(pwindow->pwin);
 	glfwTerminate();
-}
-
-static double gettime()
-{
-  struct timespec ts;
-  clock_gettime(CLOCK_MONOTONIC, &ts);
-  return ts.tv_sec + ts.tv_nsec / 1e9;
 }
 
 void onupdate(struct window* pwindow)
@@ -127,7 +122,7 @@ void onupdate(struct window* pwindow)
   /*GL swap buffeers*/
   glfwSwapBuffers(pwindow->pwin);
   /*Game actions*/
-  pwindow->windata.curtime = gettime();
+  pwindow->windata.curtime = (float)glfwGetTime();
   if(player_move_handler(pwindow)){
     mobs_move_handler(pwindow);
   }
