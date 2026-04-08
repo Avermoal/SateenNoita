@@ -14,7 +14,7 @@ uniform float u_speed;
 
 void main() {
     vec3 pos = aPos;
-    if (aTexLayer == 11 || aTexLayer == 13) {
+    if (aTexLayer == 13 || aTexLayer == 15) {
         float scaleY = 1 + sin(u_time * u_speed) * u_amplitude;
         pos.y *= scaleY;
     }

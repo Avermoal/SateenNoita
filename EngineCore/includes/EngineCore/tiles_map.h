@@ -22,7 +22,6 @@ struct tile{
 
 struct gamemap{
   struct tile groundmap[MAP_HEIGHT][MAP_WIDTH];
-  struct tile effect[MAP_HEIGHT][MAP_WIDTH];
   struct tile mobs[MAP_HEIGHT][MAP_WIDTH];
   int pcx, pcy; /*Player coordinate x and y*/
   int border; /*Border*/

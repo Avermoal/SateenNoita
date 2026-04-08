@@ -10,8 +10,8 @@ struct stats{
   bool isalive;
 };
 
-void addHP(struct tile* mob, short HP);
-void addMP(struct tile* mob, short MP);
+void addHP(struct tile* mob, short delta);
+void addMP(struct tile* mob, short delta);
 
 struct stats update_player_stats_on_interface(struct container* cnt, struct tile* mob);
 

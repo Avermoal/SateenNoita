@@ -1,6 +1,7 @@
 #include "EngineCore/tiles_map.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -29,7 +30,7 @@
 #define MOBS_START_HP_MP 10
 #define PLAYER_START_HP_MP 100
 
-#define SEED 323908
+#define SEED 97152890
 
 static void set_mobs(struct gamemap* gmap, int lbc, bool is_new_line)
 {
@@ -122,10 +123,10 @@ static void set_mobs(struct gamemap* gmap, int lbc, bool is_new_line)
         gmap->mobs[y][x].ycoord = ypos;
         gmap->mobs[y][x].isobstacle = tiletype[y][x].isobstacle;
         gmap->mobs[y][x].layer = MOBS_LAYER;
-        gmap->mobs[MAP_HEIGHT - 1][x].stts = malloc(sizeof(struct stats));
-        gmap->mobs[MAP_HEIGHT - 1][x].stts->HP = MOBS_START_HP_MP;
-        gmap->mobs[MAP_HEIGHT - 1][x].stts->MP = MOBS_START_HP_MP;
-        gmap->mobs[MAP_HEIGHT - 1][x].stts->isalive = true;
+        gmap->mobs[y][x].stts = malloc(sizeof(struct stats));
+        gmap->mobs[y][x].stts->HP = MOBS_START_HP_MP;
+        gmap->mobs[y][x].stts->MP = MOBS_START_HP_MP;
+        gmap->mobs[y][x].stts->isalive = true;
         /*Set texture coordinates*/
         const float xtex = 0.0f;
         const float ytex = 0.0f;
@@ -170,6 +171,8 @@ static void set_mobs(struct gamemap* gmap, int lbc, bool is_new_line)
 
 void createtilemap(struct tilemap* map)
 {
+  /*Memset zero*/
+  memset(map, 0, sizeof(struct tilemap));
   /*Load texture array*/
   #ifndef NDEBUG
   if(TILES_TYPE_NUMBER == get_textures_number(PATH_TO_TEXTURES)){
@@ -255,35 +258,35 @@ void createtilemap(struct tilemap* map)
   vertices[0].pos[2] = MOBS_LAYER;
   vertices[0].tex[0] = xtex;
   vertices[0].tex[1] = ytex;
-  vertices[0].texlayer = ID_000010_PLAYER;
+  vertices[0].texlayer = ID_000012_PLAYER;
   /*Bottom-right*/
   vertices[1].pos[0] = xpos + TILE_SIZE;
   vertices[1].pos[1] = ypos;
   vertices[1].pos[2] = MOBS_LAYER;
   vertices[1].tex[0] = xtex + TEX_SHIFT;
   vertices[1].tex[1] = ytex;
-  vertices[1].texlayer = ID_000010_PLAYER;
+  vertices[1].texlayer = ID_000012_PLAYER;
   /*Top-right*/
   vertices[2].pos[0] = xpos + TILE_SIZE;
   vertices[2].pos[1] = ypos + TILE_SIZE;
   vertices[2].pos[2] = MOBS_LAYER;
   vertices[2].tex[0] = xtex + TEX_SHIFT;
   vertices[2].tex[1] = ytex + TEX_SHIFT;
-  vertices[2].texlayer = ID_000010_PLAYER;
+  vertices[2].texlayer = ID_000012_PLAYER;
   /*Top-left*/
   vertices[3].pos[0] = xpos;
   vertices[3].pos[1] = ypos + TILE_SIZE;
   vertices[3].pos[2] = MOBS_LAYER;
   vertices[3].tex[0] = xtex;
   vertices[3].tex[1] = ytex + TEX_SHIFT;
-  vertices[3].texlayer = ID_000010_PLAYER;
+  vertices[3].texlayer = ID_000012_PLAYER;
   /*Set player on place and player properties*/
   map->gmap.pcx = PLAYER_START_COORDX;
   map->gmap.pcy = PLAYER_START_COORDY;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].isobstacle = true;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].xcoord = xpos;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].ycoord = ypos;
-  map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].id = ID_000010_PLAYER;
+  map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].id = ID_000012_PLAYER;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].layer = MOBS_LAYER;
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].stts = malloc(sizeof(struct stats));
   map->gmap.mobs[PLAYER_START_COORDY][PLAYER_START_COORDX].stts->HP = PLAYER_START_HP_MP;
@@ -304,9 +307,6 @@ void destroytilemap(struct tilemap* map)
         destroyelement(&map->gmap.mobs[y][x].tile);
         free(map->gmap.mobs[y][x].stts);
         map->gmap.mobs[y][x].stts = NULL;
-      }
-      if(map->gmap.effect[y][x].tile.vao != 0){
-        destroyelement(&map->gmap.effect[y][x].tile);
       }
     }
   }
@@ -442,9 +442,6 @@ static void destroy_last_map_line(struct tilemap* map)
     if(map->gmap.mobs[0][x].tile.vao != 0){
       destroyelement(&map->gmap.mobs[0][x].tile);
     }
-    if(map->gmap.effect[0][x].tile.vao != 0){
-      destroyelement(&map->gmap.effect[0][x].tile);
-    }
   }
 }
 
@@ -457,11 +454,27 @@ void updatetilemap(struct tilemap* map)
         /*Swap lines*/
         nearest_swap_tile(map->gmap.groundmap, y, x, y + 1, x);
         nearest_swap_tile(map->gmap.mobs, y, x, y + 1, x);
-        nearest_swap_tile(map->gmap.effect, y, x, y + 1, x);
       }
     }
     add_first_map_line(map);
     --(map->gmap.pcy);
+  }
+  short id = 0;
+  struct tile* mob = NULL;
+  for(int y = 0; y < MAP_HEIGHT; ++y){
+    for(int x = 0; x < MAP_WIDTH; ++x){
+      id = map->gmap.mobs[y][x].id;
+      mob = &map->gmap.mobs[y][x];
+      if(id != ID_000000_ERROR && id != ID_000000_VOID && id != ID_000012_PLAYER){
+        if(mob->stts && !mob->stts->isalive){
+          mob->id = ID_000000_VOID;
+          mob->isobstacle = false;
+          free(mob->stts);
+          mob->stts = NULL;
+          update_tile_position(mob, mob->xcoord, mob->ycoord);
+        }
+      }
+    }
   }
 }
 
@@ -489,9 +502,6 @@ void rendertilemap(struct tilemap* map, GLuint shaderprogram, float screenaspect
       if(map->gmap.mobs[y][x].tile.vao != 0){
         displayelement(map->gmap.mobs[y][x].tile);
       }
-      if(map->gmap.effect[y][x].tile.vao != 0){
-        displayelement(map->gmap.effect[y][x].tile);
-      }
     }
   }
 }
@@ -503,7 +513,14 @@ void move_player_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T)
     if(!gmap->groundmap[gmap->pcy + MOVE][gmap->pcx].isobstacle && !gmap->mobs[gmap->pcy + MOVE][gmap->pcx].isobstacle){
       if(nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy + MOVE, gmap->pcx)){
         gmap->pcy += MOVE;
-        addMP(&gmap->mobs[gmap->pcy][gmap->pcx], 1);
+        addMP(&gmap->mobs[gmap->pcy][gmap->pcx], 1); /*PLAYER*/
+        addHP(&gmap->mobs[gmap->pcy][gmap->pcx], 5);
+      }
+    }else{
+      short mobid = gmap->mobs[gmap->pcy + MOVE][gmap->pcx].id;
+      struct tile* mob = &gmap->mobs[gmap->pcy + MOVE][gmap->pcx];
+      if(mobid != ID_000000_ERROR && mobid != ID_000000_VOID && mobid != ID_000012_PLAYER){
+        addHP(mob, -5);
       }
     }
   }
@@ -512,6 +529,13 @@ void move_player_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T)
       if(nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy, gmap->pcx + MOVE)){
         gmap->pcx += MOVE;
         addMP(&gmap->mobs[gmap->pcy][gmap->pcx], 1);
+        addHP(&gmap->mobs[gmap->pcy][gmap->pcx], 5);
+      }
+    }else{
+      short mobid = gmap->mobs[gmap->pcy][gmap->pcx + MOVE].id;
+      struct tile* mob = &gmap->mobs[gmap->pcy][gmap->pcx + MOVE];
+      if(mobid != ID_000000_ERROR && mobid != ID_000000_VOID && mobid != ID_000012_PLAYER){
+        addHP(mob, -5);
       }
     }
   }
@@ -520,8 +544,14 @@ void move_player_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T)
       if(nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy - MOVE, gmap->pcx)){
         gmap->pcy -= MOVE;
         addMP(&gmap->mobs[gmap->pcy][gmap->pcx], 1);
+        addHP(&gmap->mobs[gmap->pcy][gmap->pcx], 5);
       }
-
+    }else{
+      short mobid = gmap->mobs[gmap->pcy - MOVE][gmap->pcx].id;
+      struct tile* mob = &gmap->mobs[gmap->pcy - MOVE][gmap->pcx];
+      if(mobid != ID_000000_ERROR && mobid != ID_000000_VOID && mobid != ID_000012_PLAYER){
+        addHP(mob, -5);
+      }
     }
   }
   if(MT_T == MT_LT){
@@ -529,6 +559,13 @@ void move_player_on_place(struct gamemap* gmap, enum MOVE_TO_TILE MT_T)
       if(nearest_swap_tile(gmap->mobs, gmap->pcy, gmap->pcx, gmap->pcy, gmap->pcx - MOVE)){
         gmap->pcx -= MOVE;
         addMP(&gmap->mobs[gmap->pcy][gmap->pcx], 1);
+        addHP(&gmap->mobs[gmap->pcy][gmap->pcx], 5);
+      }
+    }else{
+      short mobid = gmap->mobs[gmap->pcy][gmap->pcx - MOVE].id;
+      struct tile* mob = &gmap->mobs[gmap->pcy][gmap->pcx - MOVE];
+      if(mobid != ID_000000_ERROR && mobid != ID_000000_VOID && mobid != ID_000012_PLAYER){
+        addHP(mob, -5);
       }
     }
   }

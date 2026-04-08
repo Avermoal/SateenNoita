@@ -154,7 +154,21 @@ texnumber get_textures_number(const char* path_to_dir)
   return texnum;
 }
 
-static int cmpstr(const void* a, const void* b)
+static int extractid(const char* str)
+{
+  return atoi(str + 3);
+}
+
+static int cmpstr1(const void* a, const void* b)
+{
+  const char* stra = *(const char**)a;
+  const char* strb = *(const char**)b;
+  int ida = extractid(stra);
+  int idb = extractid(strb);
+  return (ida - idb);
+}
+
+static int cmpstr2(const void* a, const void* b)
 {
   return strcmp(*(const char**)a, *(const char**)b);
 }
@@ -172,6 +186,10 @@ void get_textures_names(texnumber texnum, char* tex_files[texnum], const char* p
       }
     }
     closedir(dirp);
-    qsort(tex_files, tn, sizeof(char*), cmpstr);
+    if(strstr(tex_files[0], "ID_")){
+      qsort(tex_files, tn, sizeof(char*), cmpstr1);
+      return;
+    }
+    qsort(tex_files, tn, sizeof(char*), cmpstr2);
   }
 }

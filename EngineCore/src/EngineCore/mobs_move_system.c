@@ -18,16 +18,15 @@ void mobs_move_handler(struct window* pwindow)
   for(int y = 0; y < MAP_HEIGHT; ++y){
     for(int x = 0; x < MAP_WIDTH; ++x){
       id = gmap->mobs[y][x].id;
-      if(id == ID_000000_VOID || id == ID_000010_PLAYER){
-        continue;
-      }
-      if(astar(gmap, y, x, pcy, pcx, &nexty, &nextx)){
-        if(nextx == pcx && nexty == pcy){
-          /*PLACE MOBS FOR ATTACK*/
-          addHP(&gmap->mobs[pcy][pcx], -5);
-          continue;
+      if(id != ID_000000_ERROR && id != ID_000000_VOID && id != ID_000012_PLAYER){
+        if(astar(gmap, y, x, pcy, pcx, &nexty, &nextx)){
+          if(nextx == pcx && nexty == pcy){
+            /*PLACE FOR ATTACK*/
+            addHP(&gmap->mobs[pcy][pcx], -1);
+            continue;
+          }
+          nearest_swap_tile(gmap->mobs, y, x, nexty, nextx);
         }
-        nearest_swap_tile(gmap->mobs, y, x, nexty, nextx);
       }
     }
   }

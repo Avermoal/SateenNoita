@@ -38,11 +38,11 @@ void mapgen(int maph, int mapw, struct tile (*map)[mapw], int lbc, enum META_TIL
       for(int y = 0; y < maph; ++y){
         for(int x = 0; x < mapw; ++x){
           if(hieghtmap[y][x] < OAK_BOUND && hieghtmap[y][x] > TREE_BOUND){
-            map[y][x].id = ID_000008_TREE_OAK;
+            map[y][x].id = ID_000010_TREE_OAK;
             map[y][x].isobstacle = true;
           }
           if(hieghtmap[y][x] > FIR_BOUND && hieghtmap[y][x] < TREE_BOUND){
-            map[y][x].id = ID_000009_TREE_FIR;
+            map[y][x].id = ID_000011_TREE_FIR;
             map[y][x].isobstacle = true;
           }
           if(hieghtmap[y][x] > GRASS_BOUND_BOTTOM && hieghtmap[y][x] < GRASS_BOUND_TOP){
@@ -64,7 +64,7 @@ void mapgen(int maph, int mapw, struct tile (*map)[mapw], int lbc, enum META_TIL
         for(int y = 0; y < maph; ++y){
           for(int x = 0; x < mapw; ++x){
             if(hieghtmap[y][x] < MOBS_PLACE_BOUND_TOP && hieghtmap[y][x] > MOBS_PLACE_BOUND_BOTTOM){
-              map[y][x].id = ID_000012_GOLEM;
+              map[y][x].id = ID_000014_GOLEM;
               map[y][x].isobstacle = true;
             }
           }
