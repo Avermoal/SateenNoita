@@ -18,7 +18,7 @@ void mobs_move_handler(struct window* pwindow)
   for(int y = 0; y < MAP_HEIGHT; ++y){
     for(int x = 0; x < MAP_WIDTH; ++x){
       id = gmap->mobs[y][x].id;
-      if(id != ID_000000_ERROR && id != ID_000000_VOID && id != ID_000012_PLAYER){
+      if(id != ID_000000_ERROR && id != ID_000000_VOID && id != ID_000012_PLAYER && id != ID_000013_CHEST){
         if(astar(gmap, y, x, pcy, pcx, &nexty, &nextx)){
           if(nextx == pcx && nexty == pcy){
             /*PLACE FOR ATTACK*/

@@ -4,6 +4,7 @@
 #include "EngineCore/texture_manager.h"
 #include "EngineCore/display_manager.h"
 #include "EngineCore/tiles_info.h"
+#include "EngineCore/inventory.h"
 
 #define INTERFACE_WIDTH (MAP_WIDTH * TILE_SIZE)/2
 #define INTERFACE_HEIGHT (MAP_HEIGHT * TILE_SIZE)
@@ -26,7 +27,8 @@ struct gameinterface{
   struct texturearray texarray;
   struct interfacepart left, right;
   struct container spelllist, statslist;
-  struct interfacepart inventory, spell_craft_menu;
+  struct inventory inv;
+  struct interfacepart spell_craft_menu;
 };
 
 void create_game_interface(struct gameinterface* gint);

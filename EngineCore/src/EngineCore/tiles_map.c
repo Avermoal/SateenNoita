@@ -10,12 +10,13 @@
 #include "EngineCore/game_window_info.h"
 #include "EngineCore/map_generator.h"
 #include "EngineCore/stats_system.h"
+#include "EngineCore/inventory.h"
 
 #include "Mathematics/ortho_projection.h"
 
 #define GROUND_LAYER 0.0f
-#define MOBS_LAYER 1.0f
-#define EFFECT_LAYER 2.0f
+#define MOBS_LAYER 0.5f
+#define ITEMS_LAYER 1.0f
 
 #define PATH_TO_TEXTURES "res/textures/game_textures"
 
@@ -308,6 +309,11 @@ void destroytilemap(struct tilemap* map)
         free(map->gmap.mobs[y][x].stts);
         map->gmap.mobs[y][x].stts = NULL;
       }
+      if(map->gmap.items[y][x].tile.vao != 0){
+        destroyelement(&map->gmap.mobs[y][x].tile);
+        free(map->gmap.items[y][x].stts);
+        map->gmap.items[y][x].stts = NULL;
+      }
     }
   }
   /*Destroy texture array*/
@@ -433,14 +439,22 @@ static void add_first_map_line(struct tilemap* map)
                                              true, GL_STATIC_DRAW);
   }
   set_mobs(&map->gmap, map->gmap.genoffset, true);
+  for(int i = 0; i < MAP_WIDTH; ++i){
+    memset(&map->gmap.items[MAP_HEIGHT - 1][i], 0, sizeof(struct tile));
+  }
 }
 
 static void destroy_last_map_line(struct tilemap* map)
 {
-  for(int x = 0; x <  MAP_WIDTH; ++x){
+  for(int x = 0; x < MAP_WIDTH; ++x){
     destroyelement(&map->gmap.groundmap[0][x].tile);
     if(map->gmap.mobs[0][x].tile.vao != 0){
       destroyelement(&map->gmap.mobs[0][x].tile);
+      free(map->gmap.mobs[0][x].stts);
+      map->gmap.mobs[0][x].stts = NULL;
+    }
+    if(map->gmap.items[0][x].tile.vao != 0){
+      destroyelement(&map->gmap.items[0][x].tile);
     }
   }
 }
@@ -454,6 +468,7 @@ void updatetilemap(struct tilemap* map)
         /*Swap lines*/
         nearest_swap_tile(map->gmap.groundmap, y, x, y + 1, x);
         nearest_swap_tile(map->gmap.mobs, y, x, y + 1, x);
+        nearest_swap_tile(map->gmap.items, y, x, y + 1, x);
       }
     }
     add_first_map_line(map);
@@ -472,6 +487,14 @@ void updatetilemap(struct tilemap* map)
           free(mob->stts);
           mob->stts = NULL;
           update_tile_position(mob, mob->xcoord, mob->ycoord);
+          if(id == ID_000013_CHEST){
+            map->gmap.items[y][x].tile = spawnitem(x, y, map->gmap.genoffset, &map->gmap.items[y][x].id, ITEMS_LAYER);
+            map->gmap.items[y][x].xcoord = x * TILE_SIZE;
+            map->gmap.items[y][x].ycoord = y * TILE_SIZE;
+            map->gmap.items[y][x].isobstacle = false;
+            map->gmap.items[y][x].layer = ITEMS_LAYER;
+            map->gmap.items[y][x].stts = NULL;
+          }
         }
       }
     }
@@ -501,6 +524,9 @@ void rendertilemap(struct tilemap* map, GLuint shaderprogram, float screenaspect
       }
       if(map->gmap.mobs[y][x].tile.vao != 0){
         displayelement(map->gmap.mobs[y][x].tile);
+      }
+      if(map->gmap.items[y][x].tile.vao != 0){
+        displayelement(map->gmap.items[y][x].tile);
       }
     }
   }

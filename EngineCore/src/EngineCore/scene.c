@@ -137,6 +137,64 @@ void renderscene(struct window* win)
   glEnable(GL_DEPTH_TEST);
   unbind_texture_array();
   unbind_shader_program();
+  /*RENDER INVENTORY*/
+  bind_shader_program(win->shp.interfaceprog);
+  glActiveTexture(GL_TEXTURE0);
+  bind_texture_array(win->scn->gint.inv.texarray);
+  textureloc = glGetUniformLocation(win->shp.interfaceprog, "interfaceTextureArray");
+  #ifndef NDEBUG/*Check uniform var*/
+  if(textureloc == -1){
+    LOG_CRITICAL("Uniform 'interfaceTextureArray' not found in shader program!");
+    /*Input all uniform var in shader*/
+    GLint uniformcount = 0;
+    glGetProgramiv(win->shp.interfaceprog, GL_ACTIVE_UNIFORMS, &uniformcount);
+    LOG_CRITICAL("Total active uniforms in shader: %d\n", uniformcount);
+    char uniformname[256];
+    for(GLint i = 0; i < uniformcount; ++i){
+      GLsizei length;
+      GLint size;
+      GLenum type;
+      glGetActiveUniform(win->shp.interfaceprog, i, sizeof(uniformname), &length, &size, &type, uniformname);
+      LOG_CRITICAL("Uniform %d: %s (type: %d, size: %d)\n", i, uniformname, type, size);
+    }
+  }
+  #endif/*Check uniform var*/
+  glUniform1i(textureloc, 0);
+  /*Send projection matrix to shader*/
+  projectionloc = glGetUniformLocation(win->shp.interfaceprog, "projview");
+  glUniformMatrix4fv(projectionloc, 1, GL_FALSE, projection);
+  renderinventory(&win->scn->gint.inv);
+  unbind_texture_array();
+  unbind_shader_program();
+  /*RENDER ITEMS in inventory*/
+  bind_shader_program(win->shp.interfaceprog);
+  glActiveTexture(GL_TEXTURE0);
+  bind_texture_array(win->scn->gint.inv.items_tex_array);
+  textureloc = glGetUniformLocation(win->shp.interfaceprog, "interfaceTextureArray");
+  #ifndef NDEBUG/*Check uniform var*/
+  if(textureloc == -1){
+    LOG_CRITICAL("Uniform 'interfaceTextureArray' not found in shader program!");
+    /*Input all uniform var in shader*/
+    GLint uniformcount = 0;
+    glGetProgramiv(win->shp.interfaceprog, GL_ACTIVE_UNIFORMS, &uniformcount);
+    LOG_CRITICAL("Total active uniforms in shader: %d\n", uniformcount);
+    char uniformname[256];
+    for(GLint i = 0; i < uniformcount; ++i){
+      GLsizei length;
+      GLint size;
+      GLenum type;
+      glGetActiveUniform(win->shp.interfaceprog, i, sizeof(uniformname), &length, &size, &type, uniformname);
+      LOG_CRITICAL("Uniform %d: %s (type: %d, size: %d)\n", i, uniformname, type, size);
+    }
+  }
+  #endif/*Check uniform var*/
+  glUniform1i(textureloc, 0);
+  /*Send projection matrix to shader*/
+  projectionloc = glGetUniformLocation(win->shp.interfaceprog, "projview");
+  glUniformMatrix4fv(projectionloc, 1, GL_FALSE, projection);
+  renderitems(&win->scn->gint.inv);
+  unbind_texture_array();
+  unbind_shader_program();
 }
 
 void updatescene(struct scene* scn)

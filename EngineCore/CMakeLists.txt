@@ -39,6 +39,7 @@ set(ENGINE_PRIVATE_INCLUDES
   includes/EngineCore/system_actions.h
   includes/EngineCore/text_display_system.h
   includes/EngineCore/stats_system.h
+  includes/EngineCore/inventory.h
 
   ${MATH_PRIVATE_INCLUDES}
 )
@@ -59,6 +60,7 @@ set(ENGINE_PRIVATE_SOURCES
   src/EngineCore/system_actions.c
   src/EngineCore/text_display_system.c
   src/EngineCore/stats_system.c
+  src/EngineCore/inventory.c
 
   ${MATH_PRIVATE_SOURCES}
 )

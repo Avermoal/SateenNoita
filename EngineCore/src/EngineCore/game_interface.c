@@ -17,18 +17,23 @@
 #define INTERFACE_TEXTURE_LAYER_LEFT 0
 #define INTERFACE_TEXTURE_LAYER_RIGHT 1
 
-#define STATS_LIST_COORDY (INTERFACE_HEIGHT - 16)
+#define STATS_LIST_COORDY (INTERFACE_HEIGHT)
 #define STATS_LIST_COORDX 0.0f
 #define STATS_LIST_HEIGHT (16.0f + 16.0f)
 #define STATS_LIST_WIDTH 32.0f
+
+#define INV_COORDX (-INTERFACE_WIDTH)
+#define INV_COORDY 0.0f
+#define INV_HEIGHT 150.0f
+#define INV_WIDTH 150.0f
+
 #define TEXT_SCALE 0.5f
 
 static struct element create_element_part_interface(float y, float x, float height, float width, int texlayer);
-static void resize_interface_part(struct element* elem, float y, float x, float height, float width, int texlayer);
 static struct container create_spell_list();
 static struct container create_stats_list(float rely, float relx, float height, float width);
-static struct element createinventory();
 static struct element create_spell_craft_menu();
+static void update_inventory_position(struct inventory* inv);
 
 void create_game_interface(struct gameinterface* gint)
 {
@@ -44,8 +49,8 @@ void create_game_interface(struct gameinterface* gint)
   gint->right.part = create_element_part_interface(gint->right.ycoord, gint->right.xcoord, INTERFACE_HEIGHT, INTERFACE_WIDTH, INTERFACE_TEXTURE_LAYER_RIGHT);
   /*Other interface element*/
   gint->spelllist = create_spell_list();
+  gint->inv = createinventory(INV_COORDX, INV_COORDY, INV_WIDTH, INV_HEIGHT);
   gint->statslist = create_stats_list(STATS_LIST_COORDY, STATS_LIST_COORDX, STATS_LIST_HEIGHT, STATS_LIST_WIDTH);
-  gint->inventory.part = createinventory();
   gint->spell_craft_menu.part = create_spell_craft_menu();
 }
 //@TODO Uncomment when interface will be created full
@@ -63,12 +68,10 @@ void destroy_game_interface(struct gameinterface* gint)
   if(gint->statslist.txt){
     destroytext(gint->statslist.txt);
   }
-  if(gint->inventory.part.vao != 0){
-    //destroyelement(&gint->inventory.part);
-  }
   if(gint->spell_craft_menu.part.vao != 0){
     //destroyelement(&gint->spell_craft_menu.part);
   }
+  destroyinventory(&gint->inv);
   delete_texture_array(&gint->texarray);
 }
 
@@ -101,31 +104,36 @@ void render_game_interface(struct gameinterface* gint, float screenaspect)
   }
   /*Update containers coordinates*/
   gint->statslist.xcoord = left + 5.0f;
+  gint->statslist.ycoord = top - 15.0f;
+  /*Update inventory coordinates*/
+  gint->inv.xcoord = left;
+  gint->inv.width = -left;
   /*RESIZE INTERFACE TO WINDOW SIDES*/
-  float left_width = -left;
-  float right_width = right - mapwidth;
-  if(left_width > 0){
+  float leftwidth = -left;
+  float rightwidth = right - mapwidth;
+  if(leftwidth > 0){
     struct vertex verts[VERTICES_COUNT];
     verts[0] = (struct vertex){{left, 0.0f, 0.0f}, {0.0f, 0.0f}, INTERFACE_TEXTURE_LAYER_LEFT};
-    verts[1] = (struct vertex){{left + left_width, 0.0f, 0.0f}, {1.0f, 0.0f}, INTERFACE_TEXTURE_LAYER_LEFT};
-    verts[2] = (struct vertex){{left + left_width, INTERFACE_HEIGHT, 0.0f}, {1.0f, 1.0f}, INTERFACE_TEXTURE_LAYER_LEFT};
+    verts[1] = (struct vertex){{left + leftwidth, 0.0f, 0.0f}, {1.0f, 0.0f}, INTERFACE_TEXTURE_LAYER_LEFT};
+    verts[2] = (struct vertex){{left + leftwidth, INTERFACE_HEIGHT, 0.0f}, {1.0f, 1.0f}, INTERFACE_TEXTURE_LAYER_LEFT};
     verts[3] = (struct vertex){{left, INTERFACE_HEIGHT, 0.0f}, {0.0f, 1.0f}, INTERFACE_TEXTURE_LAYER_LEFT};
     glBindBuffer(GL_ARRAY_BUFFER, gint->left.part.vbo);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(verts), verts);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     displayelement(gint->left.part);
   }
-  if(right_width > 0){
+  if(rightwidth > 0){
     struct vertex verts[VERTICES_COUNT];
     verts[0] = (struct vertex){{mapwidth, 0.0f, 0.0f}, {0.0f, 0.0f}, INTERFACE_TEXTURE_LAYER_RIGHT};
-    verts[1] = (struct vertex){{mapwidth + right_width, 0.0f, 0.0f}, {1.0f, 0.0f}, INTERFACE_TEXTURE_LAYER_RIGHT};
-    verts[2] = (struct vertex){{mapwidth + right_width, INTERFACE_HEIGHT, 0.0f}, {1.0f, 1.0f}, INTERFACE_TEXTURE_LAYER_RIGHT};
+    verts[1] = (struct vertex){{mapwidth + rightwidth, 0.0f, 0.0f}, {1.0f, 0.0f}, INTERFACE_TEXTURE_LAYER_RIGHT};
+    verts[2] = (struct vertex){{mapwidth + rightwidth, INTERFACE_HEIGHT, 0.0f}, {1.0f, 1.0f}, INTERFACE_TEXTURE_LAYER_RIGHT};
     verts[3] = (struct vertex){{mapwidth, INTERFACE_HEIGHT, 0.0f}, {0.0f, 1.0f}, INTERFACE_TEXTURE_LAYER_RIGHT};
     glBindBuffer(GL_ARRAY_BUFFER, gint->right.part.vbo);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(verts), verts);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     displayelement(gint->right.part);
   }
+  update_inventory_position(&gint->inv);
 }
 
 static struct element create_element_part_interface(float y, float x, float height, float width, int texlayer)
@@ -165,22 +173,6 @@ static struct element create_element_part_interface(float y, float x, float heig
   return createelement(vertices, VERTICES_COUNT, indices, INDICES_COUNT, true, GL_STATIC_DRAW);
 }
 
-static void resize_interface_part(struct element* elem, float y, float x, float height, float width, int texlayer)
-{
-  struct vertex vertices[VERTICES_COUNT];
-  unsigned int indices[INDICES_COUNT] = {0, 1, 2, 2, 1, 0};
-  /*Fill vertex*/
-  vertices[0] = (struct vertex){{x, y, 0.0f}, {0.0f, 0.0f}, texlayer};
-  vertices[1] = (struct vertex){{x + width, y, 0.0f}, {1.0f, 0.0f}, texlayer};
-  vertices[2] = (struct vertex){{x + width, y + height, 0.0f}, {1.0f, 1.0f}, texlayer};
-  vertices[3] = (struct vertex){{x, y + height, 0.0f}, {0.0f, 1.0f}, texlayer};
-  /*If element exist delete it*/
-  if(elem->vao){
-    destroyelement(elem);
-  }
-  *elem = createelement(vertices, VERTICES_COUNT, indices, INDICES_COUNT, true, GL_DYNAMIC_DRAW);
-}
-
 static struct container create_spell_list()
 {
   struct container spelllist;
@@ -202,15 +194,49 @@ static struct container create_stats_list(float rely, float relx, float height, 
   return statslist;
 }
 
-static struct element createinventory()
-{
-  struct element inventory;
-  return inventory;
-}
-
 static struct element create_spell_craft_menu()
 {
   struct element spell_craft_menu;
   return spell_craft_menu;
 }
 
+static void update_inventory_position(struct inventory* inv)
+{
+  if(inv->elem.vao == 0){
+    return;
+  }
+  /*Vertices defines*/
+  struct vertex vertices[VERTICES_COUNT];
+  /*Setup vertices for this part of interface*/
+  /*Bottom-left*/
+  vertices[0].pos[0] = inv->xcoord;
+  vertices[0].pos[1] = inv->ycoord;
+  vertices[0].pos[2] = INVENTORY_LAYER;
+  vertices[0].tex[0] = INVENTORY_TEXTURE_START_COORD;
+  vertices[0].tex[1] = INVENTORY_TEXTURE_START_COORD;
+  vertices[0].texlayer = INVENTORY_TEX_LAYER;
+  /*Bottom-right*/
+  vertices[1].pos[0] = inv->xcoord + inv->width;
+  vertices[1].pos[1] = inv->ycoord;
+  vertices[1].pos[2] = INVENTORY_LAYER;
+  vertices[1].tex[0] = INVENTORY_TEXTURE_START_COORD + TEX_SHIFT;
+  vertices[1].tex[1] = INVENTORY_TEXTURE_START_COORD;
+  vertices[1].texlayer = INVENTORY_TEX_LAYER;
+  /*Top-right*/
+  vertices[2].pos[0] = inv->xcoord + inv->width;
+  vertices[2].pos[1] = inv->ycoord + inv->height;
+  vertices[2].pos[2] = INVENTORY_LAYER;
+  vertices[2].tex[0] = INVENTORY_TEXTURE_START_COORD + TEX_SHIFT;
+  vertices[2].tex[1] = INVENTORY_TEXTURE_START_COORD + TEX_SHIFT;
+  vertices[2].texlayer = INVENTORY_TEX_LAYER;
+  /*Top-left*/
+  vertices[3].pos[0] = inv->xcoord;
+  vertices[3].pos[1] = inv->ycoord + inv->height;
+  vertices[3].pos[2] = INVENTORY_LAYER;
+  vertices[3].tex[0] = INVENTORY_TEXTURE_START_COORD;
+  vertices[3].tex[1] = INVENTORY_TEXTURE_START_COORD + TEX_SHIFT;
+  vertices[3].texlayer = INVENTORY_TEX_LAYER;
+  glBindBuffer(GL_ARRAY_BUFFER, inv->elem.vbo);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+}

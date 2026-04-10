@@ -9,6 +9,8 @@
 #define GRASS_BOUND_BOTTOM -0.7f
 #define MOBS_PLACE_BOUND_TOP 0.14f
 #define MOBS_PLACE_BOUND_BOTTOM 0.12f
+#define CHEST_BOUND_TOP -0.4f
+#define CHEST_BOUND_BOTTOM -0.42f
 
 //@TODO Написать функцию устанавливающую препятсвия(любые)
 static void setobstacles(int maph, int mapw, struct tile (*map)[mapw])
@@ -67,6 +69,15 @@ void mapgen(int maph, int mapw, struct tile (*map)[mapw], int lbc, enum META_TIL
               map[y][x].id = ID_000014_GOLEM;
               map[y][x].isobstacle = true;
             }
+          }
+        }
+      }
+      /*Set chests*/
+      for(int y = 0; y < maph; ++y){
+        for(int x = 0; x < mapw; ++x){
+          if(hieghtmap[y][x] < CHEST_BOUND_TOP && hieghtmap[y][x] > CHEST_BOUND_BOTTOM){
+            map[y][x].id = ID_000013_CHEST;
+            map[y][x].isobstacle = true;
           }
         }
       }
