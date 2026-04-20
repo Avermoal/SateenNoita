@@ -3,13 +3,14 @@
 
 #include "EngineCore/display_manager.h"
 #include "EngineCore/texture_manager.h"
+#include "EngineCore/tiles_info.h"
 
 #define MAX_ITEM_COUNT 21
 
 struct item{
   float xcoord, ycoord;
   struct element elem;
-  short id;
+  short id; /*Same like TILE_TYPE*/
 };
 
 struct inventory{
@@ -31,6 +32,8 @@ void updateinventory(struct inventory* inv);
 void renderinventory(struct inventory* inv);
 
 struct element spawnitem(float x, float y, float genoffset, short* id, float ITEMS_LAYER);
+
+void add_item_in_inventory(enum TILE_TYPE tt, struct inventory* inv);
 
 void renderitems(struct inventory* inv);
 

@@ -133,7 +133,7 @@ static void set_mobs(struct gamemap* gmap, int lbc, bool is_new_line)
         const float ytex = 0.0f;
         const int texlayer = tiletype[y][x].id;
         /*Setup vertices for this tile*/
-      /*Bottom-left*/
+        /*Bottom-left*/
         vertices[0].pos[0] = xpos;
         vertices[0].pos[1] = ypos;
         vertices[0].pos[2] = MOBS_LAYER;
@@ -459,7 +459,7 @@ static void destroy_last_map_line(struct tilemap* map)
   }
 }
 
-void updatetilemap(struct tilemap* map)
+void updatetilemap(struct tilemap* map, struct inventory* inv)
 {
   if(map->gmap.pcy >= map->gmap.border){
     destroy_last_map_line(map);
@@ -498,6 +498,12 @@ void updatetilemap(struct tilemap* map)
         }
       }
     }
+  }
+  if(map->gmap.items[map->gmap.pcy][map->gmap.pcx].tile.vao != 0){
+    struct tile* item = &map->gmap.items[map->gmap.pcy][map->gmap.pcx];
+    add_item_in_inventory(item->id, inv);
+    item->id = ID_000000_VOID;
+    update_tile_position(item, item->xcoord, item->ycoord);
   }
 }
 

@@ -10,15 +10,7 @@ struct GLFWwindow;
 
 struct stats;
 
-struct tile{
-  float xcoord;/*OpenGL use float for displaying elements on screen*/
-  float ycoord;
-  struct element tile;
-  short id;
-  bool isobstacle;
-  float layer;
-  struct stats* stts;
-};
+struct inventory;
 
 struct gamemap{
   struct tile groundmap[MAP_HEIGHT][MAP_WIDTH];
@@ -38,7 +30,7 @@ void createtilemap(struct tilemap* map);
 
 void destroytilemap(struct tilemap* map);/*Need to destroy elements in tiles*/
 
-void updatetilemap(struct tilemap* map);
+void updatetilemap(struct tilemap* map, struct inventory* inv);
 
 void rendertilemap(struct tilemap* map, GLuint shaderprogram, float screenaspect);
 

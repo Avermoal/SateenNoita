@@ -31,7 +31,6 @@ set(ENGINE_PRIVATE_INCLUDES
   includes/EngineCore/display_manager.h
   includes/EngineCore/tiles_info.h
   includes/EngineCore/texture_manager.h
-  includes/EngineCore/tiles_map.h
   includes/EngineCore/map_generator.h
   includes/EngineCore/player_move_system.h
   includes/EngineCore/mobs_move_system.h
@@ -40,6 +39,12 @@ set(ENGINE_PRIVATE_INCLUDES
   includes/EngineCore/text_display_system.h
   includes/EngineCore/stats_system.h
   includes/EngineCore/inventory.h
+  includes/EngineCore/collision.h
+  includes/EngineCore/map_scroller.h
+  includes/EngineCore/movement_system.h
+  includes/EngineCore/tile_data.h
+  includes/EngineCore/tile_renderer.h
+  includes/EngineCore/map_data.h
 
   ${MATH_PRIVATE_INCLUDES}
 )
@@ -53,7 +58,6 @@ set(ENGINE_PRIVATE_SOURCES
   src/EngineCore/game_interface.c
   src/EngineCore/display_manager.c
   src/EngineCore/texture_manager.c
-  src/EngineCore/tiles_map.c
   src/EngineCore/map_generator.c
   src/EngineCore/player_move_system.c
   src/EngineCore/mobs_move_system.c
@@ -61,6 +65,11 @@ set(ENGINE_PRIVATE_SOURCES
   src/EngineCore/text_display_system.c
   src/EngineCore/stats_system.c
   src/EngineCore/inventory.c
+  src/EngineCore/collision.c
+  src/EngineCore/map_scroller.c
+  src/EngineCore/movement_system.c
+  src/EngineCore/tile_renderer.c
+  src/EngineCore/map_data.c
 
   ${MATH_PRIVATE_SOURCES}
 )

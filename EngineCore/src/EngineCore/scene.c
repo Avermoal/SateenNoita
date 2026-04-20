@@ -199,7 +199,7 @@ void renderscene(struct window* win)
 
 void updatescene(struct scene* scn)
 {
-  updatetilemap(&scn->map);
+  updatetilemap(&scn->map, &scn->gint.inv);
   if(!update_player_stats_on_interface(&scn->gint.statslist, &scn->map.gmap.mobs[scn->map.gmap.pcy][scn->map.gmap.pcx]).isalive){
     LOG_CRITICAL("GAME OVER\n");
   }

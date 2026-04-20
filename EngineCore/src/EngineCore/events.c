@@ -12,6 +12,8 @@
 #define MOUSE_BUTTONS 1024
 #define MAX_KEYS_NUMBERS 1032
 
+struct eventsdata evdata;
+
 /*Callbacks*/
 void window_close_callback(struct GLFWwindow *pwindow);
 

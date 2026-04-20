@@ -9,6 +9,6 @@ struct eventsdata{
 	float y;
 };
 
-static struct eventsdata evdata;
+extern struct eventsdata evdata;
 
 #endif/**ENGINECORE_EVENTS_DATA_H*/
